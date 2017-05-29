@@ -51,9 +51,13 @@ pdns_rec_config:
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_10 }}"
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_11 }}"
 dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
+dnsdist_locals: ['127.0.0.1:5300']
+dnsdist_controlsocket: "127.0.0.1"
+# dnsdist_setkey: "" # Change this
 dnsdist_acls: ['0.0.0.0/0', '::/0' ]
 dnsdist_servers: ['127.0.0.1:55']
 dnsdist_config: |
+  controlSocket("127.0.0.1")
   setTCPRecvTimeout(2)
   addAnyTCRule()
   setServerPolicy(firstAvailable)
@@ -68,5 +72,3 @@ dnsdist_config: |
   addDNSCryptBind("127.0.0.1:5353", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
   addDNSCryptBind("127.0.0.1:8080", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
   addDNSCryptBind("127.0.0.1:27015", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
-
-
