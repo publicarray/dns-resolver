@@ -85,16 +85,17 @@ pdns_rec_config:
   # trace: 'off' # if we should output heaps of logging. set to 'fail' to only log failing domains
   version-string: '' # string reported on version.pdns or version.bind
 
-# [dnsdist]
+# [dnsdist] http://dnsdist.org/README/
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_10 }}"
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_11 }}"
 dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
 dnsdist_locals: ['127.0.0.1:5300']
 dnsdist_controlsocket: "127.0.0.1"
 # dnsdist_setkey: "" # Change this
-dnsdist_acls: ['0.0.0.0/0', '::/0' ]
+dnsdist_acls: []
 dnsdist_servers: ['127.0.0.1:55']
 dnsdist_config: |
+  setACL({'0.0.0.0/0', '::/0'})
   controlSocket("127.0.0.1")
   setTCPRecvTimeout(2)
   addAnyTCRule()
