@@ -5,7 +5,7 @@ pdns_rec_config:
   allow-from: # If set, only allow these comma separated netmasks to recurse
     - '0.0.0.0/0'
     - '::/0'
-  local-address: '127.0.0.1,::' # local-address IP addresses to listen on, separated by spaces or commas. Also accepts ports.
+  local-address: '127.0.0.1,::1' # local-address IP addresses to listen on, separated by spaces or commas. Also accepts ports.
   local-port: '56' # port to listen on
   any-to-tcp: 'yes' # Answer ANY queries with tc=1, shunting to TCP
   client-tcp-timeout: '2' # Timeout in seconds when talking to TCP clients
