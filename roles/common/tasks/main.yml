@@ -3,12 +3,12 @@
 - name: Install packages for Debian OS family
   apt: pkg={{ item }} state=present
   when: ansible_os_family == 'Debian'
-  with_items: ubuntu_installed_packages
+  with_items: "{{ubuntu_installed_packages}}"
 
 - name: Install packages for RedHat OS family
-  yum: name=curl state=present
+  yum: name={{ item }} state=present
   when: ansible_os_family == 'RedHat'
-  with_items: redhat_installed_packages
+  with_items: "{{redhat_installed_packages}}"
 
 #
 # - group:

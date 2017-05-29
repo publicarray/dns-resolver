@@ -1,0 +1,22 @@
+- name: Install dnscrypt-wrapper - git clone
+  git:
+    repo: 'https://github.com/cofyc/dnscrypt-wrapper.git'
+    dest: /opt/dnscrypt-wrapper
+    recursive: yes
+    update: yes
+
+- name: Install dnscrypt-wrapper - make configure
+  make:
+    chdir: '/opt/dnscrypt-wrapper'
+    target: configure
+
+- name: Install dnscrypt-wrapper - ./configure
+  command: '"{{ item }}" chdir=/opt/dnscrypt-wrapper'
+  with_items:
+    - ./configure
+
+- name: Install dnscrypt-wrapper - make install
+  make:
+    chdir: '/opt/dnscrypt-wrapper'
+    target: install
+

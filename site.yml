@@ -10,4 +10,4 @@
     - unbound
     - PowerDNS.pdns_recursor
     - PowerDNS.dnsdist
-    # - dnscrypt-wrapper
+    - dnscrypt-wrapper

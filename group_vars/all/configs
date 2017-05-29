@@ -3,11 +3,34 @@ ubuntu_installed_packages:
   - curl
   - nano
   - htop
+  - git
+  - libsodium-dev #
+  - libevent-dev #
+  - autoconf #
+  - make #
+  - gcc #
 
 redhat_installed_packages:
   - curl
   - nano
   - htop
+  - git # dependency to build dnscrypt-wrapper
+  - libsodium-devel # dependency to build dnscrypt-wrapper
+  - libevent-devel # dependency to build dnscrypt-wrapper
+  - autoconf # dependency to build dnscrypt-wrapper
+  - make # dependency to build dnscrypt-wrapper
+  - gcc # dependency to build dnscrypt-wrapper
+
+openBSD_installed_packages:
+  - curl
+  - nano
+  - htop
+  - git #
+  - libsodium #
+  - libevent #
+  - autoconf
+  - gmake #
+  - gcc #
 
 # [DEBIAN auto updates] https://github.com/jnv/ansible-role-unattended-upgrades
 # unattended_mail: your@email.com # e-mail address to send information about upgrades or problems with unattended upgrades
