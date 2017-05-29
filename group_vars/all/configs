@@ -1,4 +1,41 @@
 ---
+ubuntu_installed_packages:
+  - curl
+  - nano
+  - htop
+
+redhat_installed_packages:
+  - curl
+  - nano
+  - htop
+
+# [DEBIAN auto updates] https://github.com/jnv/ansible-role-unattended-upgrades
+# unattended_mail: your@email.com # e-mail address to send information about upgrades or problems with unattended upgrades
+# unattended_origins_patterns: # https://github.com/jnv/ansible-role-unattended-upgrades#patterns-examples
+#   - 'origin=Ubuntu,archive=${distro_codename}-security'
+#   - 'o=Ubuntu,a=${distro_codename}-proposed-updates'
+#   - 'o=Ubuntu,a=${distro_codename}-updates'
+#   - 'o=Ubuntu,a=${distro_codename}'
+# unattended_install_on_shutdown: false
+# unattended_automatic_reboot: false
+# unattended_automatic_reboot_time: false
+# unattended_ignore_apps_require_restart: false
+# unattended_remove_unused_dependencies: false
+
+# [REDHAT auto updates] https://github.com/jeffwidman/ansible-yum-cron
+# email_to: your@email.com
+hourly_update_level: security
+hourly_update_message: yes
+hourly_download_updates: yes
+hourly_apply_updates: yes
+hourly_random_sleep: 15
+daily_update_level: default
+daily_update_message: yes
+daily_download_updates: yes
+daily_apply_updates: yes
+daily_random_sleep: 180
+
+# [pdns_recursor]
 # pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_40 }}"
 pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_master }}"
 pdns_rec_config:
@@ -48,6 +85,7 @@ pdns_rec_config:
   # trace: 'off' # if we should output heaps of logging. set to 'fail' to only log failing domains
   version-string: '' # string reported on version.pdns or version.bind
 
+# [dnsdist]
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_10 }}"
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_11 }}"
 dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"

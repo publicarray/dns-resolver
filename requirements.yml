@@ -14,3 +14,12 @@
   scm: git
   version: master
   name: jdauphant.unbound
+
+- src: jnv.unattended-upgrades
+  version: master
+  name: jnv.unattended-upgrades
+
+- src: https://github.com/jeffwidman/ansible-yum-cron
+  scm: git
+  version: master
+  name: jeffwidman.yum-cron

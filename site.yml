@@ -2,11 +2,11 @@
 - name: Install unbound, pdns_recursor, dnsdist, and dnscrypt-wrapper
   hosts: dns-server
   remote_user: root
-  # remote_user: user
-  # sudo: yes
 
   roles:
     - common
+    - { role: jnv.unattended-upgrades, when: ansible_os_family == 'Darwin' }
+    - { role: jeffwidman.yum-cron, when: ansible_os_family == 'RedHat' }
     - unbound
     - PowerDNS.pdns_recursor
     - PowerDNS.dnsdist
