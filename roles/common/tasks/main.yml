@@ -1,0 +1,58 @@
+---
+# curl
+- name: Install curl for Debian OS family
+  apt: pkg=curl state=present
+  when: ansible_os_family == 'Debian'
+  tags: ["packages","curl"]
+
+- name: Install curl for RedHat OS family
+  yum: name=curl state=present
+  when: ansible_os_family == 'RedHat'
+  tags: ["packages","curl"]
+
+# nano
+- name: Install nano for Debian OS family
+  apt: pkg=nano state=present
+  when: ansible_os_family == 'Debian'
+  tags: ["packages","nano"]
+
+- name: Install nano for RedHat OS family
+  yum: name=nano state=present
+  when: ansible_os_family == 'RedHat'
+  tags: ["packages","nano"]
+
+# htop
+- name: Install htop for Debian OS family
+  apt: pkg=htop state=present
+  when: ansible_os_family == 'Debian'
+  tags: ["packages","htop"]
+
+- name: Install htop for RedHat OS family
+  yum: name=htop state=present
+  when: ansible_os_family == 'RedHat'
+  tags: ["packages","htop"]
+
+#
+# - group:
+#     name: pdns
+#     state: present
+#     when: ansible_os_family == 'Debian'
+
+# - user:
+#     name: pdns
+#     state: present
+#     comment: "pdns-recursor"
+#     group: pdns
+#     when: ansible_os_family == 'Debian'
+
+# - group:
+#     name: pdns-recursor
+#     state: present
+#     when: ansible_os_family == 'RedHat'
+
+# - user:
+#     name: pdns-recursor
+#     state: present
+#     comment: "pdns-recursor"
+#     group: pdns-recursor
+#     when: ansible_os_family == 'RedHat'

@@ -1,0 +1,72 @@
+---
+# pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_40 }}"
+pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_master }}"
+pdns_rec_config:
+  allow-from: # If set, only allow these comma separated netmasks to recurse
+    - '0.0.0.0/0'
+    - '::/0'
+  local-address: '127.0.0.1,::' # local-address IP addresses to listen on, separated by spaces or commas. Also accepts ports.
+  local-port: '56' # port to listen on
+  any-to-tcp: 'yes' # Answer ANY queries with tc=1, shunting to TCP
+  client-tcp-timeout: '2' # Timeout in seconds when talking to TCP clients
+  daemon: 'yes' # Operate as a daemon
+  disable-packetcache: 'no' # Disable packetcache
+  entropy-source: '/dev/urandom'
+  etc-hosts-file: '/dev/null'
+  export-etc-hosts: 'off' # If we should serve up contents from /etc/hosts
+  hint-file: '/etc/unbound/named.cache' # If set, load root hints from this file
+  log-common-errors: 'yes' # If we should log rather common errors
+  logging-facility: '0' # Facility to log messages as. 0 corresponds to local0
+  loglevel: '4' # Amount of logging. Higher is more. Do not set below 3
+  lowercase-outgoing: 'no' # Force outgoing questions to lowercase
+  max-cache-entries: '1000000' # If set, maximum number of entries in the main cache
+  max-cache-ttl: '86400' # (1 day) maximum number of seconds to keep a cached entry in memory
+  max-mthreads: '2048' #  Maximum number of simultaneous Mtasker threads
+  max-negative-ttl: '3600' # (1 hour) maximum number of seconds to keep a negative cached entry in memory
+  max-packetcache-entries: '500000' # maximum number of entries to keep in the packetcache
+  max-qperq: '50' #  Maximum outgoing queries per query
+  max-tcp-clients: '1024' # Maximum number of simultaneous TCP clients
+  max-tcp-per-client: '128' # If set, maximum number of TCP sessions per client (IP address)
+  max-total-msec: '15000' # (15 sec) Maximum total wall-clock time per query in milliseconds, 0 for unlimited <https://www.nlnetlabs.nl/downloads/publications/os3-2015-rp2-hamza-boulakhrif.pdf?
+  minimum-ttl-override: '300' # (5 min) Set under adverse conditions, a minimum TTL
+  network-timeout: '1500' # (1.5 sec) Wait this number of milliseconds for network i/o
+  no-shuffle: 'off'
+  packetcache-servfail-ttl: '60' # maximum number of seconds to keep a cached servfail entry in packetcache
+  packetcache-ttl: '3600' # maximum number of seconds to keep a cached entry in packetcache
+  query-local-address: '0.0.0.0' # Source IP address for sending queries
+  query-local-address6: '::' # Source IPv6 address for sending queries. IF UNSET, IPv6 WILL NOT BE USED FOR OUTGOING QUERIES
+  quiet: '' # Suppress logging of questions and answers
+  # security-poll-suffix: '' # Domain name from which to query security update notifications
+  serve-rfc1918: 'yes' # If we should be authoritative for RFC 1918 private IP space
+  server-down-max-fails: '64' # Maximum number of consecutive timeouts (and unreachables) to mark a server as down ( 0 => disabled )
+  server-down-throttle-time: '60' #  Number of seconds to throttle all queries to a server after being marked as down
+  # server-id: '' # Returned when queried for 'server.id' TXT or NSID, defaults to hostname
+  # single-socket: 'off' # If set, only use a single socket for outgoing queries
+  spoof-nearmiss-max: '20' # If non-zero, assume spoofing after this many near misses
+  # stats-ringbuffer-entries: '10000' # maximum number of packets to store statistics for
+  threads: '2' # Launch this number of threads
+  # trace: 'off' # if we should output heaps of logging. set to 'fail' to only log failing domains
+  version-string: '' # string reported on version.pdns or version.bind
+
+# dnsdist_install_repo: "{{ dnsdist_powerdns_repo_10 }}"
+# dnsdist_install_repo: "{{ dnsdist_powerdns_repo_11 }}"
+dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
+dnsdist_acls: ['0.0.0.0/0', '::/0' ]
+dnsdist_servers: ['127.0.0.1:55']
+dnsdist_config: |
+  setTCPRecvTimeout(2)
+  addAnyTCRule()
+  setServerPolicy(firstAvailable)
+  function maintenance()
+    addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 120)
+    addDynBlocks(exceedRespByterate(3000, 10), "Exceeded byte rate", 120)
+  end
+  addDNSCryptBind("127.0.0.1:54", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
+  addDNSCryptBind("127.0.0.1:443", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
+  addDNSCryptBind("127.0.0.1:1053", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
+  addDNSCryptBind("127.0.0.1:1194", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
+  addDNSCryptBind("127.0.0.1:5353", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
+  addDNSCryptBind("127.0.0.1:8080", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
+  addDNSCryptBind("127.0.0.1:27015", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
+
+

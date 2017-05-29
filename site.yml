@@ -1,0 +1,13 @@
+---
+- name: Install unbound, pdns_recursor, dnsdist, and dnscrypt-wrapper
+  hosts: dns-server
+  remote_user: root
+  # remote_user: user
+  # sudo: yes
+
+  roles:
+    - common
+    - unbound
+    - PowerDNS.pdns_recursor
+    - PowerDNS.dnsdist
+    # - dnscrypt-wrapper

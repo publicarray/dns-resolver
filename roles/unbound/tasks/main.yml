@@ -1,0 +1,42 @@
+---
+- name: Install unbound for Debian OS family
+  apt: pkg=unbound state=present
+  when: ansible_os_family == 'Debian'
+  tags: ["packages","unbound"]
+
+- name: Install unbound for RedHat OS family
+  yum: name=unbound state=present
+  when: ansible_os_family == 'RedHat'
+  tags: ["packages","unbound"]
+
+
+- name: Copy unbound configuration
+  template: src=unbound.conf dest=/etc/unbound/unbound.conf
+  notify: restart unbound
+  tags: ["configuration","unbound"]
+
+- stat: path=/etc/unbound/unbound_control.pem
+  register: p
+
+- name: Setup unbound-control
+  when: not p.stat.exists
+  command: unbound-control-setup
+  tags: ["configuration","unbound"]
+
+- stat: path=/etc/unbound/named.cache
+  register: p
+
+- name: Get root-hints cache
+  when: not p.stat.exists
+  get_url:
+    url: ftp://FTP.INTERNIC.NET/domain/named.cache
+    dest: /etc/unbound/named.cache
+  tags: ["configuration","unbound"]
+
+- name: Ensure unbound is running
+  service:
+    name=unbound
+    state=started
+    enabled=yes
+    pattern="unbound"
+  tags: ["service","unbound"]

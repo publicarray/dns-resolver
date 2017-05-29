@@ -1,0 +1,16 @@
+---
+
+- src: https://github.com/PowerDNS/pdns_recursor-ansible
+  scm: git
+  version: master
+  name: PowerDNS.pdns_recursor
+
+- src: https://github.com/PowerDNS/dnsdist-ansible
+  scm: git
+  version: master
+  name: PowerDNS.dnsdist
+
+- src: https://github.com/jdauphant/ansible-role-unbound
+  scm: git
+  version: master
+  name: jdauphant.unbound
