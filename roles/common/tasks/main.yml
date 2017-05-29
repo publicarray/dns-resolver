@@ -1,14 +1,27 @@
 ---
-# curl
+# Install packages
 - name: Install packages for Debian OS family
   apt: pkg={{ item }} state=present
   when: ansible_os_family == 'Debian'
-  with_items: "{{ubuntu_installed_packages}}"
+  with_items: "{{debian_installed_packages}}"
 
 - name: Install packages for RedHat OS family
   yum: name={{ item }} state=present
   when: ansible_os_family == 'RedHat'
   with_items: "{{redhat_installed_packages}}"
+
+# - name: Install packages for OpenBSD OS family
+#   openbsd_pkg: name={{ item }} state=present
+#   when: ansible_os_family == 'RedHat'
+#   with_items: "{{openBSD_installed_packages}}"
+
+- name: Install packages for FreeBSD OS family
+  pkgng: name={{ item }} state=present
+  when: ansible_os_family == 'FreeBSD'
+  with_items: "{{BSD_installed_packages}}"
+
+# ansible_os_family == [RedHat, Debian, Suse, Gentoo, Archlinux, Solaris, Alpine, FreeBSD]
+
 
 #
 # - group:

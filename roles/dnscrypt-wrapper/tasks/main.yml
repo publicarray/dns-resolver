@@ -1,22 +1,30 @@
 - name: Install dnscrypt-wrapper - git clone
+  when: ansible_os_family != 'FreeBSD'
   git:
     repo: 'https://github.com/cofyc/dnscrypt-wrapper.git'
     dest: /opt/dnscrypt-wrapper
     recursive: yes
     update: yes
+    force: yes
 
 - name: Install dnscrypt-wrapper - make configure
+  when: ansible_os_family != 'FreeBSD'
   make:
     chdir: '/opt/dnscrypt-wrapper'
     target: configure
 
 - name: Install dnscrypt-wrapper - ./configure
+  when: ansible_os_family != 'FreeBSD'
   command: '"{{ item }}" chdir=/opt/dnscrypt-wrapper'
   with_items:
     - ./configure
 
 - name: Install dnscrypt-wrapper - make install
+  when: ansible_os_family != 'FreeBSD'
   make:
     chdir: '/opt/dnscrypt-wrapper'
     target: install
 
+- name: Install dnscrypt-wrapper
+  pkgng: name=dnscrypt-wrapper state=present
+  when: ansible_os_family == 'FreeBSD'
