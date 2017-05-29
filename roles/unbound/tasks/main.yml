@@ -1,12 +1,6 @@
 ---
-- name: Install unbound for Debian OS family
-  apt: pkg=unbound state=present
-  when: ansible_os_family == 'Debian'
-  tags: ["packages","unbound"]
-
-- name: Install unbound for RedHat OS family
-  yum: name=unbound state=present
-  when: ansible_os_family == 'RedHat'
+- name: Install unbound
+  package: name=unbound state=present
   tags: ["packages","unbound"]
 
 

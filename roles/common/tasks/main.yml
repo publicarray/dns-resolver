@@ -1,5 +1,9 @@
 ---
 # Install packages
+- name: Install generic packages
+  package: pkg={{ item }} state=present
+  with_items: "{{generic_installed_packages}}"
+
 - name: Install packages for Debian OS family
   apt: pkg={{ item }} state=present
   when: ansible_os_family == 'Debian'
@@ -12,8 +16,8 @@
 
 # - name: Install packages for OpenBSD OS family
 #   openbsd_pkg: name={{ item }} state=present
-#   when: ansible_os_family == 'RedHat'
-#   with_items: "{{openBSD_installed_packages}}"
+#   when: ansible_os_family == 'FreeBSD'
+#   with_items: "{{BSD_installed_packages}}"
 
 - name: Install packages for FreeBSD OS family
   pkgng: name={{ item }} state=present
