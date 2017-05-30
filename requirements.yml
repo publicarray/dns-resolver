@@ -23,3 +23,8 @@
   scm: git
   version: master
   name: jeffwidman.yum-cron
+
+- src: https://github.com/jffz/ansible-netdata
+  scm: git
+  version: master
+  name: jffz.netdata

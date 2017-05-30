@@ -7,7 +7,8 @@
     - common
     - { role: jnv.unattended-upgrades, when: ansible_os_family == 'Darwin' }
     - { role: jeffwidman.yum-cron, when: ansible_os_family == 'RedHat' }
-    - unbound
-    - PowerDNS.pdns_recursor
-    - PowerDNS.dnsdist
-    - dnscrypt-wrapper
+    - { role: unbound, when: unbound == true }
+    - { role: PowerDNS.pdns_recursor, when: pdns_recursor == true }
+    - { role: PowerDNS.dnsdist, when: dnsdist == true }
+    - { role: dnscrypt-wrapper, when: dnscrypt_wrapper == true }
+    - { role: jffz.netdata, when: netdata == true }
