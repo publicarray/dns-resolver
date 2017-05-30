@@ -1,0 +1,6 @@
+---
+# - name: Start netdata
+#   service: name=netdata state=started enabled=yes
+
+- name: Restart dnsdist
+  service: name=dnsdist state=restarted

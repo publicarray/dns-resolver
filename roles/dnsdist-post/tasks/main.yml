@@ -1,0 +1,22 @@
+---
+
+# TODO: sysvinit and upstart
+- debug: "var=ansible_service_mgr"
+- name: Drop dnsdist Privilege
+  lineinfile:
+    path: /lib/systemd/system/dnsdist.service
+    regexp: '^\tExecStart=*'
+    line: '\tExecStart=/usr/bin/dnsdist --supervised --disable-syslog --uid dnsdist --gid dnsdist'
+    backrefs: yes
+  notify: Restart dnsdist
+  when:
+    - ansible_service_mgr == 'systemd'
+  tags: [dnsdist_post, dnsdist]
+
+- name: Ensure dnsdist is running
+  service:
+    name=dnsdist
+    state=started
+    enabled=yes
+    pattern="dnsdist"
+  tags: [dnsdist_post, dnsdist]

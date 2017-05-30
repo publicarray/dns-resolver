@@ -1,7 +1,7 @@
 ---
+# - name: Start unbound
+#   service: name=unbound state=start enabled=yes
 
-- name: restart unbound
-  service: name=unbound state=restarted enabled=yes
+- name: Restart unbound
+  service: name=unbound state=restarted
 
-- name: reload unbound
-  service: name=unbound state=reloaded
