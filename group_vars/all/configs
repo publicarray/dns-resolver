@@ -11,16 +11,19 @@ debian_installed_packages:
   - libsodium-dev # dependency to build dnscrypt-wrapper
   - libevent-dev # dependency to build dnscrypt-wrapper
   - make # dependency to build dnscrypt-wrapper
+  - dnsutils # dig command
 
 redhat_installed_packages:
   - libsodium-devel # dependency to build dnscrypt-wrapper
   - libevent-devel # dependency to build dnscrypt-wrapper
   - make # dependency to build dnscrypt-wrapper
+  - bind-utils # dig command
 
 BSD_installed_packages:
   - libsodium # dependency to build dnscrypt-wrapper
   - libevent # dependency to build dnscrypt-wrapper
   - gmake # dependency to build dnscrypt-wrapper
+  - bind-tools # dig command
 
 # [DEBIAN auto updates] https://github.com/jnv/ansible-role-unattended-upgrades
 # unattended_mail: your@email.com # e-mail address to send information about upgrades or problems with unattended upgrades
@@ -48,13 +51,17 @@ daily_download_updates: yes
 daily_apply_updates: yes
 daily_random_sleep: 180
 
+# [Generic DNScrypt]
+dnscrypt_provider_name: '2.dnscrypt-cert.dns.seby.io'
+
 # [unbound]
 unbound: true
+# see roles/unbound/template/unbound.config file for configs
 
-# [dnscrypt-wrapper]
-dnscrypt_wrapper: true
+# [dnscrypt-wrapper] https://github.com/cofyc/dnscrypt-wrapper
+dnscrypt_wrapper: false
 
-# [pdns_recursor]
+# [pdns_recursor] https://doc.powerdns.com/md/recursor/settings/
 pdns_recursor: true
 # pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_40 }}"
 pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_master }}"
@@ -67,12 +74,13 @@ pdns_rec_config:
   any-to-tcp: 'yes' # Answer ANY queries with tc=1, shunting to TCP
   client-tcp-timeout: '2' # Timeout in seconds when talking to TCP clients
   daemon: 'yes' # Operate as a daemon
+  dnssec: 'validate' # https://doc.powerdns.com/md/recursor/dnssec/
   disable-packetcache: 'no' # Disable packetcache
   entropy-source: '/dev/urandom'
   etc-hosts-file: '/dev/null'
-  export-etc-hosts: 'off' # If we should serve up contents from /etc/hosts
+  export-etc-hosts: 'no' # If we should serve up contents from /etc/hosts
   hint-file: '/etc/unbound/named.cache' # If set, load root hints from this file
-  log-common-errors: 'yes' # If we should log rather common errors
+  log-common-errors: 'no' # If we should log rather common errors
   logging-facility: '0' # Facility to log messages as. 0 corresponds to local0
   loglevel: '4' # Amount of logging. Higher is more. Do not set below 3
   lowercase-outgoing: 'no' # Force outgoing questions to lowercase
@@ -87,12 +95,12 @@ pdns_rec_config:
   max-total-msec: '15000' # (15 sec) Maximum total wall-clock time per query in milliseconds, 0 for unlimited <https://www.nlnetlabs.nl/downloads/publications/os3-2015-rp2-hamza-boulakhrif.pdf?
   minimum-ttl-override: '300' # (5 min) Set under adverse conditions, a minimum TTL
   network-timeout: '1500' # (1.5 sec) Wait this number of milliseconds for network i/o
-  no-shuffle: 'off'
+  no-shuffle: 'no'
   packetcache-servfail-ttl: '60' # maximum number of seconds to keep a cached servfail entry in packetcache
   packetcache-ttl: '3600' # maximum number of seconds to keep a cached entry in packetcache
   query-local-address: '0.0.0.0' # Source IP address for sending queries
   query-local-address6: '::' # Source IPv6 address for sending queries. IF UNSET, IPv6 WILL NOT BE USED FOR OUTGOING QUERIES
-  quiet: '' # Suppress logging of questions and answers
+  quiet: 'yes' # Suppress logging of questions and answers
   # security-poll-suffix: '' # Domain name from which to query security update notifications
   serve-rfc1918: 'yes' # If we should be authoritative for RFC 1918 private IP space
   server-down-max-fails: '64' # Maximum number of consecutive timeouts (and unreachables) to mark a server as down ( 0 => disabled )
@@ -104,6 +112,7 @@ pdns_rec_config:
   threads: '2' # Launch this number of threads
   # trace: 'off' # if we should output heaps of logging. set to 'fail' to only log failing domains
   version-string: '' # string reported on version.pdns or version.bind
+  reuseport: 'yes'
 
 # [dnsdist] http://dnsdist.org/README/
 # https://github.com/PowerDNS/dnsdist-ansible
@@ -117,29 +126,109 @@ dnsdist_controlsocket: "127.0.0.1"
 # dnsdist_acls: []
 # dnsdist_servers: ['127.0.0.1:55']
 dnsdist_config: |
-  setACL({'0.0.0.0/0', '::/0'})
-  controlSocket("127.0.0.1")
-  setTCPRecvTimeout(2)
-  setStaleCacheEntriesTTL(86400)
-  addAnyTCRule()
+  -- {{ ansible_managed }}
 
-  pc = newPacketCache(10000, 86400, 0, 60, 60)
-  newServer({address="127.0.0.1:55", name="au"})
-  getPool(""):setCache(pc)
-
-  addDelay(MaxQPSIPRule(5, 32, 48), 100)
-  function maintenance()
-    addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 120)
-    addDynBlocks(exceedRespByterate(3000, 10), "Exceeded byte rate", 120)
+  --utility function
+  function file_exists(name)
+    local f=io.open(name,"r")
+    if f~=nil then f.close() return true else return false end
   end
 
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:54", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:443", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:1053", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:1194", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:5353", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:8080", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:27015", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  ---[[ Attempt at auto renewing certificate
+    --main issue is that DNSCrypt clients need to have the old cert avaliable for 1 hour to migrate to the new cert
+    --second issue that the dnsdist needs to be restarted for the addDNSCryptBind command
+
+    local time=0
+    local cert_id=0
+
+    function create_cert()
+      warnlog("New Certificate is being generated!")
+      warnlog("New Certificate ID is " .. cert_id)
+      validTo=os.time()+(365*86400) -- Certificate is valid for 1 year
+      generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key", cert_id, os.time(), validTo)
+      local f=io.open("/etc/dnsdist/expire", "w")
+      if not f then print('Can\'t create file: /etc/dnsdist/expire'); return 'File Error'; end
+      f.write(validTo)
+      f.close()
+      cert_id=cert_id+1
+    end
+
+    function check_cert()
+      warnlog("Checking cert!")
+      local f=io.open("/etc/dnsdist/expire", "r")
+      if f~=nil
+      then
+        local f=io.open("/etc/dnsdist/expire", "r")
+        local expire=f.read()
+        f.close()
+        warnlog("Cert expires at " .. expire .. " time now is " .. os.time())
+        if expire < os.time()+(10800) -- 3 hours before cert expires
+        then
+          create_cert()
+        else
+          warnlog("Cert is still valid!")
+        end
+      else
+        create_cert()
+      end
+    end
+
+    function renew() --add renew() to maintenance function
+      time=time+1
+      if time > 3600 -- 3600=1h, 365*86400=1 year, 3600=every 22 hours
+      then
+        time=0
+        check_cert()
+      end
+    end
+
+  --]]
+
+  --General settings
+  setACL({'0.0.0.0/0', '::/0'}) --allow WWW
+  controlSocket("127.0.0.1")
+  setTCPRecvTimeout(2) --client timeout 2 sec
+  setStaleCacheEntriesTTL(43200) --43200sec = 12h
+  addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
+  setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin,leastOutstanding
+
+  --Backend servers / Packet Cache
+  pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
+  newServer({address="127.0.0.1:56", name="au", order=1, tcpFastOpen=true})
+  newServer({address="208.67.222.222", name="OpenDNS", order=100}) --fallback
+  newServer({address="208.67.220.220", name="OpenDNS", order=100}) --fallback
+  getPool(""):setCache(pc)
+
+  --Simple abuse protection
+  addDelay(MaxQPSIPRule(5, 32, 48), 200) --add 200ms delay to IPs with grater than 5qps (queries per second)
+
+  function maintenance()
+    addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 120) --block IPs grater than 20qps in 10 sec for 2 min
+    addDynBlocks(exceedRespByterate(3000, 10), "Exceeded byte rate", 120) --block IPs that request more than 3000 bytes in 10sec for 2 min
+    renew()
+  end
+
+  --DNSCrypt / DNSCurve
+  --Generate Keys only once
+  if file_exists("/etc/dnsdist/providerPrivate.key") == false
+  then
+    generateDNSCryptProviderKeys("/etc/dnsdist/providerPublic.key", "/etc/dnsdist/providerPrivate.key")
+  end
+
+  --Generate Cert (Expires in 1 Year!)
+  if file_exists("/etc/dnsdist/resolver.cert") == false
+  then
+    generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key", 0, os.time(), os.time()+(365*86400))
+  end
+
+  --Open ports / Listening for clients
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:54", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:443", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:1053", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:1194", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:5353", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:8080", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:27015", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
 
 # [netdata]
 netdata: true

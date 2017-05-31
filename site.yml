@@ -7,8 +7,9 @@
     - common
     - { role: jnv.unattended-upgrades, when: ansible_os_family == 'Darwin' }
     - { role: jeffwidman.yum-cron, when: ansible_os_family == 'RedHat' }
-    - { role: unbound, when: unbound == true }
-    - { role: PowerDNS.pdns_recursor, when: pdns_recursor == true }
-    - { role: PowerDNS.dnsdist, when: dnsdist == true }
-    - { role: dnscrypt-wrapper, when: dnscrypt_wrapper == true }
-    - { role: jffz.netdata, when: netdata == true }
+    - { role: unbound, when: unbound == true, tags: [unbound] }
+    - { role: PowerDNS.pdns_recursor, when: pdns_recursor == true, tags: [pdns_recursor] }
+    - { role: PowerDNS.dnsdist, when: dnsdist == true, tags: [dnsdist] }
+    - { role: dnsdist-post, when: dnsdist == true, tags: [dnsdist]}
+    - { role: dnscrypt-wrapper, when: dnscrypt_wrapper == true, tags: [dnscrypt_wrapper] }
+    - { role: jffz.netdata, when: netdata == true, tags: [netdata] }
