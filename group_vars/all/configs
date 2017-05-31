@@ -106,6 +106,7 @@ pdns_rec_config:
   version-string: '' # string reported on version.pdns or version.bind
 
 # [dnsdist] http://dnsdist.org/README/
+# https://github.com/PowerDNS/dnsdist-ansible
 dnsdist: true
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_10 }}"
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_11 }}"
@@ -113,25 +114,32 @@ dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
 dnsdist_locals: []
 dnsdist_controlsocket: "127.0.0.1"
 # dnsdist_setkey: "" # Change this
-dnsdist_acls: []
-dnsdist_servers: ['127.0.0.1:55']
+# dnsdist_acls: []
+# dnsdist_servers: ['127.0.0.1:55']
 dnsdist_config: |
   setACL({'0.0.0.0/0', '::/0'})
   controlSocket("127.0.0.1")
   setTCPRecvTimeout(2)
+  setStaleCacheEntriesTTL(86400)
   addAnyTCRule()
-  setServerPolicy(firstAvailable)
+
+  pc = newPacketCache(10000, 86400, 0, 60, 60)
+  newServer({address="127.0.0.1:55", name="au"})
+  getPool(""):setCache(pc)
+
+  addDelay(MaxQPSIPRule(5, 32, 48), 100)
   function maintenance()
     addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 120)
     addDynBlocks(exceedRespByterate(3000, 10), "Exceeded byte rate", 120)
   end
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:54", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:443", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:1053", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:1194", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:5353", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:8080", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:27015", "2.dnscrypt-cert.dns.seby.io", "/root/resolver.cert", "/root/resolver.key")
+
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:54", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:443", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:1053", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:1194", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:5353", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:8080", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  addDNSCryptBind("{{ansible_default_ipv4.address}}:27015", "2.dnscrypt-cert.dns.seby.io", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
 
 # [netdata]
 netdata: true
