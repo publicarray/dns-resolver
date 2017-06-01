@@ -1,0 +1,5 @@
+__nsd_user: _nsd
+__nsd_group: _nsd
+__nsd_db_dir: /var/nsd/db
+__nsd_conf_dir: /var/nsd/etc
+__nsd_run_dir: /var/nsd/run

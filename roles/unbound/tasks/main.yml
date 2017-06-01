@@ -41,7 +41,7 @@
 
 - name: Ensure unbound is running
   service:
-    name=unbound
-    state=started
-    enabled=yes
-    pattern="unbound"
+    name: unbound
+    state: started
+    enabled: true
+    pattern: "unbound"

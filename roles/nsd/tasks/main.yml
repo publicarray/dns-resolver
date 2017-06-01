@@ -1,0 +1,54 @@
+---
+# Heavily inspired by: https://github.com/reallyenglish/ansible-role-nsd
+# thanks to Tomoyuki Sakurai and Contributors
+
+- include_vars: "{{ ansible_os_family }}.yml"
+  tags: [always, update-opennic-tlds]
+
+- name: Install nsd
+  package:
+    name: nsd
+    state: present
+
+- name: Create db directory
+  file:
+    path: "{{ nsd_db_dir }}"
+    mode: 0750
+    owner: "{{ nsd_user }}"
+    group: "{{ nsd_group }}"
+    state: directory
+  notify: Restart nsd
+
+- name: Create nsd.conf
+  template:
+    src: nsd.conf
+    dest: "{{ nsd_conf }}"
+    # validate: nsd-checkconf %s
+  notify: Reload nsd
+
+- name: Run nsd-control-setup
+  command: nsd-control-setup
+  args:
+    creates: "{{ nsd_conf_dir }}/nsd_control.key"
+  when: nsd_remote_control == "yes"
+
+- name: Get OpenNIC tlds
+  shell: "dig @45.56.115.189 TXT tlds.opennic.glue +short | grep -v '^;' | sed s/\\\"//g | tr \" \" \"\\n\""
+  register: tlds
+  tags: [update-opennic-tlds]
+
+- debug: "msg={{tlds.stdout_lines}}"
+  tags: [update-opennic-tlds]
+
+- name: Copy OpenNIC config
+  template: src=opennic.conf dest={{nsd_conf_dir}}/conf.d/opennic.conf
+  notify: Restart nsd
+  tags: [update-opennic-tlds]
+
+- name: Ensure nsd is running
+  service:
+    name: nsd
+    state: started
+    enabled: true
+    pattern: "nsd"
+  tags: [nsd]

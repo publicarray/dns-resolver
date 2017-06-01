@@ -3,5 +3,7 @@
 #   service: name=unbound state=start enabled=yes
 
 - name: Restart unbound
-  service: name=unbound state=restarted
+  service:
+    name: unbound
+    state: restarted
 

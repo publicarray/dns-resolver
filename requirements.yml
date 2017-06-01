@@ -1,5 +1,10 @@
 ---
 
+- src: https://github.com/jeffwidman/ansible-yum-cron
+  scm: git
+  version: master
+  name: jeffwidman.yum-cron
+
 - src: https://github.com/PowerDNS/pdns_recursor-ansible
   scm: git
   version: master
@@ -18,11 +23,6 @@
 - src: jnv.unattended-upgrades
   version: master
   name: jnv.unattended-upgrades
-
-- src: https://github.com/jeffwidman/ansible-yum-cron
-  scm: git
-  version: master
-  name: jeffwidman.yum-cron
 
 - src: https://github.com/jffz/ansible-netdata
   scm: git

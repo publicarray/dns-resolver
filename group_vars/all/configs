@@ -125,8 +125,9 @@ dnsdist_controlsocket: "127.0.0.1"
 # dnsdist_setkey: "" # Change this
 # dnsdist_acls: []
 # dnsdist_servers: ['127.0.0.1:55']
+#{{ ansible_managed | comment('--', prefix='--\n--', postfix='--\n--\n') }}
 dnsdist_config: |
-  -- {{ ansible_managed }}
+
 
   --utility function
   function file_exists(name)
@@ -134,7 +135,7 @@ dnsdist_config: |
     if f~=nil then f.close() return true else return false end
   end
 
-  ---[[ Attempt at auto renewing certificate
+  --[[ Attempt at auto renewing certificate
     --main issue is that DNSCrypt clients need to have the old cert avaliable for 1 hour to migrate to the new cert
     --second issue that the dnsdist needs to be restarted for the addDNSCryptBind command
 
@@ -181,7 +182,6 @@ dnsdist_config: |
         check_cert()
       end
     end
-
   --]]
 
   --General settings
@@ -195,18 +195,23 @@ dnsdist_config: |
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:56", name="au", order=1, tcpFastOpen=true})
+  newServer({address="127.0.0.1:57", name="au", tcpFastOpen=true, pool="opennic"})
   newServer({address="208.67.222.222", name="OpenDNS", order=100}) --fallback
   newServer({address="208.67.220.220", name="OpenDNS", order=100}) --fallback
   getPool(""):setCache(pc)
 
-  --Simple abuse protection
-  addDelay(MaxQPSIPRule(5, 32, 48), 200) --add 200ms delay to IPs with grater than 5qps (queries per second)
+  addPoolRule({"dns.opennic.glue.", "bbs.", "bit.", "chan.", "dyn.", "free.", "fur.", "geek.", "gopher.", "indy.", "libre.", "neo.", "null.", "o.", "opennic.glue.", "oss.", "oz.", "parody.", "pirate."}, "opennic")
 
-  function maintenance()
-    addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 120) --block IPs grater than 20qps in 10 sec for 2 min
-    addDynBlocks(exceedRespByterate(3000, 10), "Exceeded byte rate", 120) --block IPs that request more than 3000 bytes in 10sec for 2 min
-    renew()
-  end
+  --[[ Simple abuse protection
+    setDynBlocksAction(DNSAction.Refused)
+    addDelay(MaxQPSIPRule(5, 32, 48), 200) --add 200ms delay to IPs with grater than 5qps (queries per second)
+
+    function maintenance()
+      addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 120) --block IPs grater than 20qps in 10 sec for 2 min
+      addDynBlocks(exceedRespByterate(3000, 10), "Exceeded byte rate", 120) --block IPs that request more than 3000 bytes in 10sec for 2 min
+      renew()
+    end
+  --]]
 
   --DNSCrypt / DNSCurve
   --Generate Keys only once
@@ -229,6 +234,18 @@ dnsdist_config: |
   addDNSCryptBind("{{ansible_default_ipv4.address}}:5353", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
   addDNSCryptBind("{{ansible_default_ipv4.address}}:8080", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
   addDNSCryptBind("{{ansible_default_ipv4.address}}:27015", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+
+# [OpenNIC / nsd]
+opennic: true
+# nsd_chroot_enable: true
+# nsd_chroot_dir: /opt/nsd
+nsd_flags: "--enable-root-server"
+nsd_ip_addresses: ["127.0.0.1"]
+nsd_reuseport: "yes"
+nsd_port: 57
+nsd_hide_version: "yes"
+nsd_round_robin: "yes"
+nsd_remote_control: "yes"
 
 # [netdata]
 netdata: true
