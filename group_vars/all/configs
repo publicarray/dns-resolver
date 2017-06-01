@@ -195,7 +195,7 @@ dnsdist_config: |
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:56", name="au", order=1, tcpFastOpen=true})
-  newServer({address="127.0.0.1:57", name="au", tcpFastOpen=true, pool="opennic"})
+  newServer({address="127.0.0.1:57", name="au-opennic", tcpFastOpen=true, pool="opennic"})
   newServer({address="208.67.222.222", name="OpenDNS", order=100}) --fallback
   newServer({address="208.67.220.220", name="OpenDNS", order=100}) --fallback
   getPool(""):setCache(pc)
