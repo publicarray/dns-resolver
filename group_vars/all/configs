@@ -79,7 +79,7 @@ pdns_rec_config:
   entropy-source: '/dev/urandom'
   etc-hosts-file: '/dev/null'
   export-etc-hosts: 'no' # If we should serve up contents from /etc/hosts
-  hint-file: '/etc/unbound/named.cache' # If set, load root hints from this file
+  hint-file: '/etc/unbound/root.hints' # If set, load root hints from this file
   log-common-errors: 'no' # If we should log rather common errors
   logging-facility: '0' # Facility to log messages as. 0 corresponds to local0
   loglevel: '4' # Amount of logging. Higher is more. Do not set below 3
@@ -194,13 +194,11 @@ dnsdist_config: |
 
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
-  newServer({address="127.0.0.1:56", name="au", order=1, tcpFastOpen=true})
-  newServer({address="127.0.0.1:57", name="au-opennic", tcpFastOpen=true, pool="opennic"})
-  newServer({address="208.67.222.222", name="OpenDNS", order=100}) --fallback
-  newServer({address="208.67.220.220", name="OpenDNS", order=100}) --fallback
+  newServer({address="127.0.0.1:55", name="unbound", order=1, tcpFastOpen=true})
+  newServer({address="127.0.0.1:56", name="pdns_recursor", order=1, tcpFastOpen=true})
+  newServer({address="208.67.222.222", name="OpenDNS", order=100}) --last resort/fallback
+  newServer({address="208.67.220.220", name="OpenDNS", order=100}) --last resort/fallback
   getPool(""):setCache(pc)
-
-  addPoolRule({"dns.opennic.glue.", "bbs.", "bit.", "chan.", "dyn.", "free.", "fur.", "geek.", "gopher.", "indy.", "libre.", "neo.", "null.", "o.", "opennic.glue.", "oss.", "oz.", "parody.", "pirate."}, "opennic")
 
   --[[ Simple abuse protection
     setDynBlocksAction(DNSAction.Refused)

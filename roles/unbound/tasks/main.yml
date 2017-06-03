@@ -18,7 +18,7 @@
 
 - name: Copy unbound configuration
   template: src=unbound.conf dest=/etc/unbound/unbound.conf
-  notify: Restart unbound
+  notify: Restart unbound with cache
 
 - name: Check unbound configuration
   command: unbound-checkconf
@@ -29,15 +29,15 @@
 - name: Setup unbound-control
   when: not p.stat.exists
   command: unbound-control-setup
+  notify: Restart unbound with cache
 
 - stat: path=/etc/unbound/named.cache
   register: p
 
 - name: Get root-hints cache
-  when: not p.stat.exists
   get_url:
     url: ftp://FTP.INTERNIC.NET/domain/named.cache
-    dest: /etc/unbound/named.cache
+    dest: /etc/unbound/root.hints
 
 - name: Ensure unbound is running
   service:

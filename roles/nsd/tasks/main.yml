@@ -33,11 +33,14 @@
   when: nsd_remote_control == "yes"
 
 - name: Get OpenNIC tlds
+  # dig @45.56.115.189 TXT tlds.opennic.glue +short | grep -v '^;' | sed s/\"//g | tr " " "\n"
   shell: "dig @45.56.115.189 TXT tlds.opennic.glue +short | grep -v '^;' | sed s/\\\"//g | tr \" \" \"\\n\""
   register: tlds
-  tags: [update-opennic-tlds]
+  always_run: true
+  tags: [update-opennic-tlds, unbound]
 
-- debug: "msg={{tlds.stdout_lines}}"
+- debug:
+    msg: "{{tlds.stdout_lines}}"
   tags: [update-opennic-tlds]
 
 - name: Copy OpenNIC config
