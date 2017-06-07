@@ -17,10 +17,9 @@ nsd_verbosity: 0
 nsd_chroot_enable: false
 nsd_chroot_dir: "{{ nsd_conf_dir }}"
 nsd_hide_version: "no"
-
+nsd_minimal_responses: "no"
 nsd_statistics: 0 # or 3600
 nsd_round_robin: "no"
-nsd_server_count: 1
 
 nsd_remote_control: "no"
 nsd_control_interface: [ "127.0.0.1" ]

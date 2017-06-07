@@ -36,7 +36,7 @@
   # dig @45.56.115.189 TXT tlds.opennic.glue +short | grep -v '^;' | sed s/\"//g | tr " " "\n"
   shell: "dig @45.56.115.189 TXT tlds.opennic.glue +short | grep -v '^;' | sed s/\\\"//g | tr \" \" \"\\n\""
   register: tlds
-  always_run: true
+  check_mode: false
   tags: [update-opennic-tlds, unbound]
 
 - debug:

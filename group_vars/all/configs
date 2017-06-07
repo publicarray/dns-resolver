@@ -51,18 +51,14 @@ daily_download_updates: yes
 daily_apply_updates: yes
 daily_random_sleep: 180
 
-# [Generic DNScrypt]
-dnscrypt_provider_name: '2.dnscrypt-cert.dns.seby.io'
+# [DNS]
+dns_recursor: 'unbound' # [pdns_recursor|unbound]
+dns_recursor_port: '56'
 
 # [unbound]
-unbound: true
 # see roles/unbound/template/unbound.config file for configs
 
-# [dnscrypt-wrapper] https://github.com/cofyc/dnscrypt-wrapper
-dnscrypt_wrapper: false
-
 # [pdns_recursor] https://doc.powerdns.com/md/recursor/settings/
-pdns_recursor: true
 # pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_40 }}"
 pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_master }}"
 pdns_rec_config:
@@ -70,7 +66,7 @@ pdns_rec_config:
     - '0.0.0.0/0'
     - '::/0'
   local-address: '127.0.0.1,::1' # local-address IP addresses to listen on, separated by spaces or commas. Also accepts ports.
-  local-port: '56' # port to listen on
+  local-port: '{{dns_recursor_port}}' # port to listen on
   any-to-tcp: 'yes' # Answer ANY queries with tc=1, shunting to TCP
   client-tcp-timeout: '2' # Timeout in seconds when talking to TCP clients
   daemon: 'yes' # Operate as a daemon
@@ -113,6 +109,12 @@ pdns_rec_config:
   # trace: 'off' # if we should output heaps of logging. set to 'fail' to only log failing domains
   version-string: '' # string reported on version.pdns or version.bind
   reuseport: 'yes'
+
+# [Generic DNScrypt]
+dnscrypt_provider_name: '2.dnscrypt-cert.dns.seby.io'
+
+# [dnscrypt-wrapper] https://github.com/cofyc/dnscrypt-wrapper
+dnscrypt_wrapper: false
 
 # [dnsdist] http://dnsdist.org/README/
 # https://github.com/PowerDNS/dnsdist-ansible
@@ -194,8 +196,7 @@ dnsdist_config: |
 
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
-  newServer({address="127.0.0.1:55", name="unbound", order=1, tcpFastOpen=true})
-  newServer({address="127.0.0.1:56", name="pdns_recursor", order=1, tcpFastOpen=true})
+  newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", order=1, tcpFastOpen=true})
   newServer({address="208.67.222.222", name="OpenDNS", order=100}) --last resort/fallback
   newServer({address="208.67.220.220", name="OpenDNS", order=100}) --last resort/fallback
   getPool(""):setCache(pc)
@@ -244,6 +245,7 @@ nsd_port: 57
 nsd_hide_version: "yes"
 nsd_round_robin: "yes"
 nsd_remote_control: "yes"
+nsd_minimal_responses: "no"
 
 # [netdata]
 netdata: true
