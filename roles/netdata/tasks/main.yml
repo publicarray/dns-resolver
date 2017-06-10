@@ -1,0 +1,20 @@
+# https://github.com/firehol/netdata/wiki/Installation
+
+- name: Install netdata
+  shell: echo "Y Y Y" | bash <(curl -Ss https://my-netdata.io/kickstart.sh) --dont-wait --auto-update
+  args:
+    creates: /usr/src/netdata.git
+
+- name: Copy netdata config
+  template:
+    src: netdata.conf
+    dest: /etc/netdata/netdata.conf
+  notify: Restart netdata
+
+- name: Copy netdata health-alarm-notify config
+  template:
+    src: health_alarm_notify.conf
+    dest: /etc/netdata/health_alarm_notify.conf
+  notify: Restart netdata
+  no_log: true
+

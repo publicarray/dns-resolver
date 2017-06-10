@@ -13,4 +13,4 @@
     - { role: PowerDNS.dnsdist, when: dnsdist == true, tags: [dnsdist] }
     - { role: dnsdist-post, when: dnsdist == true, tags: [dnsdist]}
     - { role: dnscrypt-wrapper, when: dnscrypt_wrapper == true, tags: [dnscrypt_wrapper] }
-    - { role: jffz.netdata, when: netdata == true, tags: [netdata] }
+    - { role: netdata, when: netdata == true, tags: [netdata] }

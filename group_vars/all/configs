@@ -18,6 +18,7 @@ redhat_installed_packages:
   - libevent-devel # dependency to build dnscrypt-wrapper
   - make # dependency to build dnscrypt-wrapper
   - bind-utils # dig command
+  - yum-utils # needs-restarting
 
 BSD_installed_packages:
   - libsodium # dependency to build dnscrypt-wrapper
@@ -50,10 +51,26 @@ daily_update_message: yes
 daily_download_updates: yes
 daily_apply_updates: yes
 daily_random_sleep: 180
+yum_cron_clean_what: packages # keep metadata
+yum_cron_clean_when: weekly
+
+# [OpenNIC / nsd]
+opennic: true
+# nsd_chroot_enable: true
+# nsd_chroot_dir: /opt/nsd
+nsd_flags: "--enable-root-server"
+nsd_ip_addresses: ["127.0.0.1"]
+nsd_reuseport: "yes"
+nsd_port: 57
+nsd_hide_version: "yes"
+nsd_round_robin: "yes"
+nsd_remote_control: "yes"
+nsd_minimal_responses: "no"
 
 # [DNS]
 dns_recursor: 'unbound' # [pdns_recursor|unbound]
 dns_recursor_port: '56'
+
 # for SELinux remember to do:
 #semanage port -a -t dns_port_t -p udp 56
 #semanage port -a -t dns_port_t -p tcp 56
@@ -78,6 +95,8 @@ pdns_rec_config:
   entropy-source: '/dev/urandom'
   etc-hosts-file: '/dev/null'
   export-etc-hosts: 'no' # If we should serve up contents from /etc/hosts
+  forward-zones: 'dns.opennic.glue=127.0.0.1:{{nsd_port}}, geek=127.0.0.1:{{nsd_port}}, opennic.glue=127.0.0.1:{{nsd_port}}, pirate=127.0.0.1:{{nsd_port}}'
+  # "dns.opennic.glue.", "bbs.", "bit.", "chan.", "dyn.", "free.", "fur.", "geek.", "gopher.", "indy.", "libre.", "neo.", "null.", "o.", "opennic.glue.", "oss.", "oz.", "parody.", "pirate."}, "opennic")
   hint-file: '/etc/unbound/root.hints' # If set, load root hints from this file
   log-common-errors: 'no' # If we should log rather common errors
   logging-facility: '0' # Facility to log messages as. 0 corresponds to local0
@@ -109,7 +128,7 @@ pdns_rec_config:
   spoof-nearmiss-max: '20' # If non-zero, assume spoofing after this many near misses
   # stats-ringbuffer-entries: '10000' # maximum number of packets to store statistics for
   threads: '2' # Launch this number of threads
-  # trace: 'off' # if we should output heaps of logging. set to 'fail' to only log failing domains
+  trace: 'off' # if we should output heaps of logging. set to 'fail' to only log failing domains
   version-string: '' # string reported on version.pdns or version.bind
   reuseport: 'yes'
 
@@ -200,8 +219,10 @@ dnsdist_config: |
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", order=1, tcpFastOpen=true})
+  --[[
   newServer({address="208.67.222.222", name="OpenDNS", order=100}) --last resort/fallback
   newServer({address="208.67.220.220", name="OpenDNS", order=100}) --last resort/fallback
+  --]]
   getPool(""):setCache(pc)
 
   --[[ Simple abuse protection
@@ -237,18 +258,8 @@ dnsdist_config: |
   addDNSCryptBind("{{ansible_default_ipv4.address}}:8080", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
   addDNSCryptBind("{{ansible_default_ipv4.address}}:27015", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
 
-# [OpenNIC / nsd]
-opennic: true
-# nsd_chroot_enable: true
-# nsd_chroot_dir: /opt/nsd
-nsd_flags: "--enable-root-server"
-nsd_ip_addresses: ["127.0.0.1"]
-nsd_reuseport: "yes"
-nsd_port: 57
-nsd_hide_version: "yes"
-nsd_round_robin: "yes"
-nsd_remote_control: "yes"
-nsd_minimal_responses: "no"
-
 # [netdata]
 netdata: true
+
+# /etc/netdata/netdata.conf
+# /etc/netdata/health_alarm_notify.conf
