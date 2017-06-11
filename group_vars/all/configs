@@ -225,7 +225,7 @@ dnsdist_config: |
   --]]
   getPool(""):setCache(pc)
 
-  --[[ Simple abuse protection
+  -- Simple abuse protection
     setDynBlocksAction(DNSAction.Refused)
     addDelay(MaxQPSIPRule(5, 32, 48), 200) --add 200ms delay to IPs with grater than 5qps (queries per second)
 
@@ -234,7 +234,6 @@ dnsdist_config: |
       addDynBlocks(exceedRespByterate(3000, 10), "Exceeded byte rate", 120) --block IPs that request more than 3000 bytes in 10sec for 2 min
       renew()
     end
-  --]]
 
   --DNSCrypt / DNSCurve
   --Generate Keys only once
