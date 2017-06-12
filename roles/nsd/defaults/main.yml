@@ -4,7 +4,7 @@ nsd_db_dir: "{{ __nsd_db_dir }}"
 nsd_run_dir: "{{ __nsd_run_dir }}"
 nsd_conf_dir: "{{ __nsd_conf_dir }}"
 nsd_conf: "{{ nsd_conf_dir }}/nsd.conf"
-nsd_zonesdir: "{{ nsd_conf_dir }}"
+nsd_zonesdir: "{{ nsd_conf_dir }}/zonefiles"
 nsd_flags: ""
 
 nsd_server_count: 1

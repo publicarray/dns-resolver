@@ -232,7 +232,7 @@ dnsdist_config: |
     function maintenance()
       addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 120) --block IPs grater than 20qps in 10 sec for 2 min
       addDynBlocks(exceedRespByterate(3000, 10), "Exceeded byte rate", 120) --block IPs that request more than 3000 bytes in 10sec for 2 min
-      renew()
+      -- renew()
     end
 
   --DNSCrypt / DNSCurve
