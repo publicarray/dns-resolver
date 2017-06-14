@@ -100,7 +100,7 @@ pdns_rec_config:
   hint-file: '/etc/unbound/root.hints' # If set, load root hints from this file
   log-common-errors: 'no' # If we should log rather common errors
   logging-facility: '0' # Facility to log messages as. 0 corresponds to local0
-  loglevel: '4' # Amount of logging. Higher is more. Do not set below 3
+  loglevel: '3' # Amount of logging. Higher is more. Do not set below 3
   lowercase-outgoing: 'no' # Force outgoing questions to lowercase
   max-cache-entries: '1000000' # If set, maximum number of entries in the main cache
   max-cache-ttl: '86400' # (1 day) maximum number of seconds to keep a cached entry in memory
@@ -149,63 +149,12 @@ dnsdist_controlsocket: "127.0.0.1"
 # dnsdist_setkey: "" # Change this
 # dnsdist_acls: []
 # dnsdist_servers: ['127.0.0.1:55']
-#{{ ansible_managed | comment('--', prefix='--\n--', postfix='--\n--\n') }}
+
 dnsdist_config: |
-
-
-  --utility function
-  function file_exists(name)
-    local f=io.open(name,"r")
-    if f~=nil then f.close() return true else return false end
-  end
-
-  --[[ Attempt at auto renewing certificate
-    --main issue is that DNSCrypt clients need to have the old cert avaliable for 1 hour to migrate to the new cert
-    --second issue that the dnsdist needs to be restarted for the addDNSCryptBind command
-
-    local time=0
-    local cert_id=0
-
-    function create_cert()
-      warnlog("New Certificate is being generated!")
-      warnlog("New Certificate ID is " .. cert_id)
-      validTo=os.time()+(365*86400) -- Certificate is valid for 1 year
-      generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key", cert_id, os.time(), validTo)
-      local f=io.open("/etc/dnsdist/expire", "w")
-      if not f then print('Can\'t create file: /etc/dnsdist/expire'); return 'File Error'; end
-      f.write(validTo)
-      f.close()
-      cert_id=cert_id+1
-    end
-
-    function check_cert()
-      warnlog("Checking cert!")
-      local f=io.open("/etc/dnsdist/expire", "r")
-      if f~=nil
-      then
-        local f=io.open("/etc/dnsdist/expire", "r")
-        local expire=f.read()
-        f.close()
-        warnlog("Cert expires at " .. expire .. " time now is " .. os.time())
-        if expire < os.time()+(10800) -- 3 hours before cert expires
-        then
-          create_cert()
-        else
-          warnlog("Cert is still valid!")
-        end
-      else
-        create_cert()
-      end
-    end
-
-    function renew() --add renew() to maintenance function
-      time=time+1
-      if time > 3600 -- 3600=1h, 365*86400=1 year, 3600=every 22 hours
-      then
-        time=0
-        check_cert()
-      end
-    end
+  --[[
+  # This file is managed by Ansible.
+  #
+  # template: /usr/local/etc/ansible/roles/PowerDNS.dnsdist/templates/dnsdist.conf.j2
   --]]
 
   --General settings
@@ -226,36 +175,16 @@ dnsdist_config: |
   getPool(""):setCache(pc)
 
   -- Simple abuse protection
-    setDynBlocksAction(DNSAction.Refused)
-    addDelay(MaxQPSIPRule(5, 32, 48), 200) --add 200ms delay to IPs with grater than 5qps (queries per second)
+  setDynBlocksAction(DNSAction.Refused)
+  addDelay(MaxQPSIPRule(5, 32, 48), 200) --add 200ms delay to IPs with grater than 5qps (queries per second)
 
-    function maintenance()
-      addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 120) --block IPs grater than 20qps in 10 sec for 2 min
-      addDynBlocks(exceedRespByterate(3000, 10), "Exceeded byte rate", 120) --block IPs that request more than 3000 bytes in 10sec for 2 min
-      -- renew()
-    end
-
-  --DNSCrypt / DNSCurve
-  --Generate Keys only once
-  if file_exists("/etc/dnsdist/providerPrivate.key") == false
-  then
-    generateDNSCryptProviderKeys("/etc/dnsdist/providerPublic.key", "/etc/dnsdist/providerPrivate.key")
+  function maintenance()
+    addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 120) --block IPs grater than 20qps in 10 sec for 2 min
+    addDynBlocks(exceedRespByterate(600, 10), "Exceeded byte rate", 120) --block IPs that request more than 600 bytes/s in 10sec for 2 min
+    -- renew()
   end
 
-  --Generate Cert (Expires in 1 Year!)
-  if file_exists("/etc/dnsdist/resolver.cert") == false
-  then
-    generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key", 0, os.time(), os.time()+(365*86400))
-  end
-
-  --Open ports / Listening for clients
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:54", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:443", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:1053", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:1194", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:5353", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:8080", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
-  addDNSCryptBind("{{ansible_default_ipv4.address}}:27015", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key")
+  includeDirectory("/etc/dnsdist/config.d/")
 
 # [netdata]
 netdata: true

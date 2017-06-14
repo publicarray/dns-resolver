@@ -18,23 +18,29 @@ $ ansible-playbook site.yml -i hosts --check --diff
 
 ## Post install
 
-Install cert (expires in one year)
+Generate new keys (optional - this is done automatically)
 
 ```sh
-# $ service dnsdist stop
-$ dnsdist --client
+$ service dnsdist stop
+$ dnsdist
 
-# > generateDNSCryptProviderKeys("/etc/dnsdist/providerPublic.key", "/etc/dnsdist/providerPrivate.key")
-# > generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key", 0, os.time(), os.time()+(365*86400))
-> printDNSCryptProviderFingerprint("/etc/dnsdist/providerPublic.key")
-> quit
-# > shutdown()
+> generateDNSCryptProviderKeys("/etc/dnsdist/providerPublic.key", "/etc/dnsdist/providerPrivate.key")
+> generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key", 0, os.time(), os.time()+(365*86400))
+> shutdown()
 
-# $ service dnsdist start
-
+$ service dnsdist start
 ```
 
-## Renew cert
+Get DNScrypt provider fingerprint
+
+```sh
+$ dnsdist --client
+
+> printDNSCryptProviderFingerprint("/etc/dnsdist/providerPublic.key")
+> quit
+```
+
+## Renew cert (required to do this one a year)
 
 ```sh 
 $ service dnsdist stop
