@@ -40,7 +40,7 @@ $ dnsdist --client
 > quit
 ```
 
-## Renew cert (required to do this one a year)
+## Renew cert (required to do this once a year)
 
 ```sh 
 $ service dnsdist stop
