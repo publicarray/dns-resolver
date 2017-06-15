@@ -44,6 +44,10 @@ addNoRecurseRule("example.com")
 addQPSLimit(makeRule("0.0.0.0"), 5)
 addAction(MaxQPSIPRule(5), NoRecurseAction())
 
+addAction(NotRule(QClassRule(1)), DropAction()) --Drop Queries that are not the internet class
+addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) --Drop Queries that are not the internet class or update command
+addAction("10.in-addr.arpa.", RCodeAction(3)) --nxdomain for private ips 10.0.0.0/8
+
 rmRule(2)
 ```
 
