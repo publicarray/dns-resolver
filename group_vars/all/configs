@@ -162,7 +162,6 @@ dnsdist_config: |
   controlSocket("127.0.0.1")
   setTCPRecvTimeout(2) --client timeout 2 sec
   setStaleCacheEntriesTTL(43200) --43200sec = 12h
-  addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
   setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin,leastOutstanding
 
   --Backend servers / Packet Cache
@@ -175,16 +174,18 @@ dnsdist_config: |
   getPool(""):setCache(pc)
 
   -- Simple abuse protection
-  setDynBlocksAction(DNSAction.Refused)
-  addDelay(MaxQPSIPRule(5, 32, 48), 200) --add 200ms delay to IPs with grater than 5qps (queries per second)
-
-  function maintenance()
-    addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 120) --block IPs grater than 20qps in 10 sec for 2 min
-    addDynBlocks(exceedRespByterate(600, 10), "Exceeded byte rate", 120) --block IPs that request more than 600 bytes/s in 10sec for 2 min
-    -- renew()
-  end
+  setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
+  addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) -- drop update queries and classes that are not for the internet
+  addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
+  addDelay(MaxQPSIPRule(8, 32, 48), 200) --add 200ms delay to IPs with grater than 8qps (queries per second)
 
   includeDirectory("/etc/dnsdist/config.d/")
+
+  function maintenance()
+    addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 300) --block IPs grater than 20qps in 10 sec for 5 min
+    addDynBlocks(exceedRespByterate(600, 10), "Exceeded byte rate", 300) --block IPs that request more than 600 bytes/s in 10sec for 5 min
+    -- renew()
+  end
 
 # [netdata]
 netdata: true
