@@ -1,4 +1,5 @@
 sudo: true
+group: edge
 services:
     - docker
 
@@ -6,11 +7,11 @@ before_install:
     - docker info
     - docker version
 
+    - docker build -f test/Dockerfile-centos7      -t dns_centos7  .
+    # - docker build -f test/Dockerfile-centos6      -t dns_centos6  .
     - docker build -f test/Dockerfile-ubuntu16.04  -t dns_xenial   .
     # - docker build -f test/Dockerfile-ubuntu14.04  -t dns_trusty   .
     # - docker build -f test/Dockerfile-ubuntu12.04  -t dns_precise  .
     # - docker build -f test/Dockerfile-debian8      -t dns_jessie   .
     # - docker build -f test/Dockerfile-debian7      -t dns_wheezy   .
-    - docker build -f test/Dockerfile-centos7      -t dns_centos7  .
-    # - docker build -f test/Dockerfile-centos6      -t dns_centos6  .
     # - docker build -f test/Dockerfile-alpine3      -t dns_alpine3  .
