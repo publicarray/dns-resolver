@@ -1,7 +1,9 @@
 ---
 # https://github.com/jedisct1/dnscrypt-server-docker/blob/master/unbound.sh
 - name: Install unbound
-  package: name=unbound state=present
+  package:
+    name: unbound
+    state: present
 
 - name: Set cache_memory variable from shell command
   shell: "echo $(($(($((1024 * $((fgrep MemAvailable /proc/meminfo || fgrep MemTotal /proc/meminfo) | sed 's/[^0-9]//g' ))) - 12582912)) / 3))"
@@ -10,24 +12,17 @@
   register: cache_memory
   check_mode: no
 
-- name: Set threads variable from shell command
-  shell: "if [ $(nproc) -gt 1 ]; then echo $((nproc - 1)); else echo 1; fi"
-  args:
-    executable: /bin/bash
-  register: threads
-  check_mode: no
-
 - name: Setup or update of the root trust anchor for DNSSEC validation
   command: unbound-anchor
+  # command: unbound-anchor -a /etc/unbound/root.key
+  register: unbound_anchor_result
+  changed_when: "unbound_anchor_result.rc == 1"
+  ignore_errors: yes
+  # Return value 1 = updated
+  # Return value 0 = no update was necessary, updated with RFC5011tracking, or an error occurred
 
-- name: Copy unbound configuration
-  template: src=unbound.conf dest=/etc/unbound/unbound.conf
-  notify: Restart unbound with cache
-
-- name: Check unbound configuration
-  command: unbound-checkconf
-
-- stat: path=/etc/unbound/unbound_control.pem
+- stat:
+    path: /etc/unbound/unbound_control.pem
   register: p
 
 - name: Setup unbound-control
@@ -35,13 +30,33 @@
   command: unbound-control-setup
   notify: Restart unbound with cache
 
-- stat: path=/etc/unbound/named.cache
+- stat:
+    path: /etc/unbound/named.cache
   register: p
 
+# https://www.internic.net/domain/named.cache
+# Update root.hints every six months or so
 - name: Get root-hints cache
+  # when: not p.stat.exists
   get_url:
-    url: ftp://FTP.INTERNIC.NET/domain/named.cache
+    url: ftp://ftp.internic.net/domain/named.cache
     dest: /etc/unbound/root.hints
+
+- name: Set threads variable from shell command
+  shell: "if [ $(nproc) -gt 1 ]; then echo $(($(nproc)-1)); else echo 1; fi"
+  args:
+    executable: /bin/bash
+  register: threads
+  check_mode: no
+
+- name: Copy unbound configuration
+  template:
+    src: unbound.conf
+    dest: /etc/unbound/unbound.conf
+  notify: Restart unbound with cache
+
+- name: Check unbound configuration
+  command: unbound-checkconf
 
 - name: Ensure unbound is running
   service:

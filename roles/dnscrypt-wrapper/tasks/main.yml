@@ -1,3 +1,14 @@
+# dependency to build dnscrypt-wrapper
+- include_vars:
+    file: "{{ ansible_os_family }}.yml"
+  tags: [always]
+
+- name: Install build/dependency packages
+  package:
+    name: "{{item}}"
+    state: present
+  with_items: "{{dnscrypt_packages}}"
+
 - name: Install dnscrypt-wrapper - git clone
   when: ansible_os_family != 'FreeBSD'
   git:

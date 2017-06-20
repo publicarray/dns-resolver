@@ -1,0 +1,4 @@
+custom_packages:
+  - htop
+
+installed_packages: "{{_packages}} {{custom_packages}}"

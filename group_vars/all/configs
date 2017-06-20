@@ -1,43 +1,19 @@
 ---
-generic_installed_packages:
-  - curl
-  - nano
+custom_packages:
   - htop
-  - git #
-  - autoconf # dependency to build dnscrypt-wrapper
-  - gcc # dependency to build dnscrypt-wrapper
-
-debian_installed_packages:
-  - libsodium-dev # dependency to build dnscrypt-wrapper
-  - libevent-dev # dependency to build dnscrypt-wrapper
-  - make # dependency to build dnscrypt-wrapper
-  - dnsutils # dig command
-
-redhat_installed_packages:
-  - libsodium-devel # dependency to build dnscrypt-wrapper
-  - libevent-devel # dependency to build dnscrypt-wrapper
-  - make # dependency to build dnscrypt-wrapper
-  - bind-utils # dig command
-  - yum-utils # needs-restarting
-
-BSD_installed_packages:
-  - libsodium # dependency to build dnscrypt-wrapper
-  - libevent # dependency to build dnscrypt-wrapper
-  - gmake # dependency to build dnscrypt-wrapper
-  - bind-tools # dig command
 
 # [DEBIAN auto updates] https://github.com/jnv/ansible-role-unattended-upgrades
 # unattended_mail: your@email.com # e-mail address to send information about upgrades or problems with unattended upgrades
-# unattended_origins_patterns: # https://github.com/jnv/ansible-role-unattended-upgrades#patterns-examples
-#   - 'origin=Ubuntu,archive=${distro_codename}-security'
-#   - 'o=Ubuntu,a=${distro_codename}-proposed-updates'
-#   - 'o=Ubuntu,a=${distro_codename}-updates'
-#   - 'o=Ubuntu,a=${distro_codename}'
-# unattended_install_on_shutdown: false
-# unattended_automatic_reboot: false
-# unattended_automatic_reboot_time: false
-# unattended_ignore_apps_require_restart: false
-# unattended_remove_unused_dependencies: false
+unattended_origins_patterns: # https://github.com/jnv/ansible-role-unattended-upgrades#patterns-examples
+  - 'origin=Ubuntu,archive=${distro_codename}-security'
+  - 'o=Ubuntu,a=${distro_codename}-proposed-updates'
+  - 'o=Ubuntu,a=${distro_codename}-updates'
+  - 'o=Ubuntu,a=${distro_codename}'
+unattended_install_on_shutdown: false
+unattended_automatic_reboot: false
+unattended_automatic_reboot_time: false
+unattended_ignore_apps_require_restart: false
+unattended_remove_unused_dependencies: false
 
 # [REDHAT auto updates] https://github.com/jeffwidman/ansible-yum-cron
 # email_to: your@email.com
@@ -70,6 +46,17 @@ nsd_minimal_responses: "no"
 # [DNS]
 dns_recursor: 'unbound' # [pdns_recursor|unbound]
 dns_recursor_port: '56'
+
+# [DNS over TCP]
+dns_over_tcp: true
+dns_over_tcp_bind_ip: 0.0.0.0
+dns_over_tcp_port: 853
+dns_over_tcp_cert:
+  - domains: [ "{{ansible_nodename}}", "www.{{ansible_nodename}}" ]
+  - provider: 'cloudflare'
+  - email: ''
+  - apikey: ''
+
 
 # for SELinux remember to do:
 #semanage port -a -t dns_port_t -p udp 56
@@ -142,8 +129,8 @@ dnscrypt_wrapper: false
 # https://github.com/PowerDNS/dnsdist-ansible
 dnsdist: true
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_10 }}"
-# dnsdist_install_repo: "{{ dnsdist_powerdns_repo_11 }}"
-dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
+dnsdist_install_repo: "{{ dnsdist_powerdns_repo_11 }}"
+# dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
 dnsdist_locals: []
 dnsdist_controlsocket: "127.0.0.1"
 # dnsdist_setkey: "" # Change this
@@ -160,8 +147,8 @@ dnsdist_config: |
   --General settings
   setACL({'0.0.0.0/0', '::/0'}) --allow WWW
   controlSocket("127.0.0.1")
-  setTCPRecvTimeout(2) --client timeout 2 sec
-  setStaleCacheEntriesTTL(43200) --43200sec = 12h
+  setTCPRecvTimeout(3) --client timeout 3 sec
+  setStaleCacheEntriesTTL(86400) --86400sec = 24h
   setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin,leastOutstanding
 
   --Backend servers / Packet Cache
@@ -176,19 +163,55 @@ dnsdist_config: |
   -- Simple abuse protection
   setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
   addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) -- drop update queries and classes that are not for the internet
-  addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
-  addDelay(MaxQPSIPRule(8, 32, 48), 200) --add 200ms delay to IPs with grater than 8qps (queries per second)
+  -- addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
+  addDelay(MaxQPSIPRule(10, 32, 48), 200) --add 200ms delay to IPs with grater than 10qps (queries per second)
 
   includeDirectory("/etc/dnsdist/config.d/")
 
   function maintenance()
     addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 300) --block IPs grater than 20qps in 10 sec for 5 min
-    addDynBlocks(exceedRespByterate(1500, 5), "Exceeded byte rate", 300) --block IPs that request more than 1500 bytes/s in 5sec for 5 min
+    addDynBlocks(exceedRespByterate(3000, 10), "Exceeded byte rate", 300) --block IPs that request more than 3000 bytes/s in 10sec for 5 min
     -- renew()
   end
 
+  -- Statistics
+  -- webserver("127.0.0.1:8083", "mysuperpass")
+  -- carbonServer("37.252.122.50")
+  -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
+
+  -- DNS over TCP
+  addLocal("127.0.0.1:53", { doTCP=true, reusePort=false, tcpFastOpenSize=0, interface=lo })
 # [netdata]
 netdata: true
 
 # /etc/netdata/netdata.conf
 # /etc/netdata/health_alarm_notify.conf
+
+
+# [haproxy]
+haproxy_global:
+  log:
+    - address: 127.0.0.1
+      facility: user
+      level: warning
+  ssl-default-bind-options: force-tlsv12
+  ssl-default-bind-ciphers: ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+  tune:
+    ssl:
+      default-dh-param: 2048
+
+haproxy_defaults:
+  mode: tcp
+
+haproxy_listen:
+  - name: dns-over-tcp
+    bind: '0.0.0.0:853'
+    log: global
+    # option: tcplog
+    ssl:
+      cert: /etc/haproxy/dns.seby.io/certkey.pem
+    servers:
+      - name: dns-server
+        ip: 127.0.0.1
+        port: 53
+        maxconn: 5000

@@ -1,0 +1,7 @@
+_packages:
+  - curl
+  - nano
+  - htop
+  - git
+  - yum-utils # needs-restarting
+  - bind-utils # dig command

@@ -2,7 +2,8 @@
 # Heavily inspired by: https://github.com/reallyenglish/ansible-role-nsd
 # thanks to Tomoyuki Sakurai and Contributors
 
-- include_vars: "{{ ansible_os_family }}.yml"
+- include_vars:
+    file: "{{ ansible_os_family }}.yml"
   tags: [always, update-opennic-tlds]
 
 - name: Install nsd

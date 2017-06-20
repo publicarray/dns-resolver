@@ -1,0 +1,7 @@
+dnscrypt_packages:
+  - git
+  - autoconf
+  - gcc
+  - libsodium-devel
+  - libevent-devel
+  - make
