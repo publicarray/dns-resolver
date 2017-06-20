@@ -52,3 +52,9 @@ $ dnsdist
 $ service dnsdist start
 
 ```
+
+# Test
+
+```
+docker build -f test/Dockerfile-ubuntu16.04 -t dns .
+```

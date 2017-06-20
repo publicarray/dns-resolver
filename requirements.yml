@@ -10,6 +10,8 @@
   version: master
   name: PowerDNS.pdns_recursor
 
+# rec_control dump-cache
+
 - src: https://github.com/PowerDNS/dnsdist-ansible
   scm: git
   version: master
@@ -28,3 +30,8 @@
   scm: git
   version: master
   name: jffz.netdata
+
+- src: https://github.com/publicarray/ansible-haproxy
+  scm: git
+  version: patch-1
+  name: publicarray.haproxy

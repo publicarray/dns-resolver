@@ -1,6 +1,6 @@
 ---
 - name: Install unbound, pdns_recursor, dnsdist, and dnscrypt-wrapper
-  hosts: dns-resolver
+  hosts: local
   remote_user: root
 
   roles:
