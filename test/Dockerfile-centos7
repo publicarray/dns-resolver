@@ -1,7 +1,5 @@
 # Start with the ubuntu image
 FROM centos:7
-# Update yum cache
-RUN yum check-update
 # Install ansible dependencies
 RUN yum install -y python-yaml python-jinja2 git
 # Clone ansible repo (could also add the ansible PPA and do an apt-get install instead)
