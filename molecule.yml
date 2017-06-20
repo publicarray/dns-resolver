@@ -1,0 +1,22 @@
+---
+ansible:
+  config_file: ./ansible.cfg
+dependency:
+  name: galaxy
+  requirements_file: requirements.yml
+driver:
+  name: docker
+docker:
+  containers:
+    - name: dns-resolver-ubuntu
+      image: ubuntu
+      image_version: latest
+      ansible_groups:
+        - group1
+    - name: dns-resolver-centos
+      image: centos
+      image_version: latest
+      ansible_groups:
+        - group1
+verifier:
+  name: testinfra

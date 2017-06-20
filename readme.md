@@ -4,13 +4,13 @@
 
 ```sh
 $ ansible-galaxy install -r requirements.yml
-$ ansible-playbook site.yml -i hosts --diff
+$ ansible-playbook playbook.yml -i hosts --diff
 ```
 
 ### Checks
 ```sh
-$ ansible-playbook site.yml -i hosts --syntax-check
-$ ansible-playbook site.yml -i hosts --check --diff
+$ ansible-playbook playbook.yml -i hosts --syntax-check
+$ ansible-playbook playbook.yml -i hosts --check --diff
 ```
 
 
@@ -55,6 +55,21 @@ $ service dnsdist start
 
 # Test
 
+## with [molecule](https://molecule.readthedocs.io/)
+
+### [first time setup](https://molecule.readthedocs.io/en/master/usage.html)
+
+```sh
+pip install molecule # or brew install molecule
+# molecule init --driver <yourdriver>
 ```
-docker build -f test/Dockerfile-ubuntu16.04 -t dns .
+
+```sh
+molecule test
+```
+
+## with docker
+
+```sh
+docker build -f docker/Dockerfile-ubuntu16.04 -t dns-ubuntu16.04 .
 ```
