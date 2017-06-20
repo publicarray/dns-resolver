@@ -8,7 +8,6 @@ RUN apt-get install -y python-yaml python-jinja2 git
 RUN git clone http://github.com/ansible/ansible.git /tmp/ansible
 
 # Set variables for ansible
-WORKDIR /tmp/ansible
 ENV PATH "/tmp/ansible/bin:/sbin:/usr/sbin:/usr/bin:${PATH}"
 ENV ANSIBLE_LIBRARY /tmp/ansible/library
 ENV PYTHONPATH /tmp/ansible/lib:$PYTHON_PATH

@@ -13,6 +13,22 @@
 
 # ansible_os_family == [RedHat, Debian, Suse, Gentoo, Archlinux, Solaris, Alpine, FreeBSD, OpenBSD]
 
+#fix for:
+# TASK [jeffwidman.yum-cron : Ensures cron(ie) service is running] ***************
+# fatal: [localhost]: FAILED! => {"changed": false, "failed": true, "msg": "Could not find the requested service crond: host"}
+# to retry, use: --limit @/etc/ansible/test.retry
+- name: fix crond service
+  package:
+    name: cronie
+    state: present
+  when: ansible_distribution == 'CentOS' and ansible_lsb.major_release|int >= 7
+
+- name: enable cronie
+  service:
+    name: crond
+    enabled: yes
+    use: service
+  when: ansible_distribution == 'CentOS' and ansible_lsb.major_release|int >= 7
 
 #
 # - group:
