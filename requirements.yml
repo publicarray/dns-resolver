@@ -35,3 +35,7 @@
   scm: git
   version: patch-1
   name: publicarray.haproxy
+
+- src: geerlingguy.repo-epel
+  version: master
+  name: geerlingguy.repo-epel

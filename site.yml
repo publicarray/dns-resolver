@@ -4,6 +4,7 @@
   remote_user: root
 
   roles:
+    - { role: geerlingguy.repo-epel, when: ansible_os_family == 'RedHat' }
     - common
     - { role: jnv.unattended-upgrades, when: ansible_os_family == 'Darwin' }
     - { role: jeffwidman.yum-cron, when: ansible_os_family == 'RedHat' }

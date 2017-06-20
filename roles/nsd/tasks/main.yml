@@ -43,8 +43,15 @@
     msg: "{{tlds.stdout_lines}}"
   tags: [update-opennic-tlds]
 
+- name: Create nsd/conf.d directory
+  file:
+    path: "{{nsd_conf_dir}}/conf.d"
+    state: directory
+
 - name: Copy OpenNIC config
-  template: src=opennic.conf dest={{nsd_conf_dir}}/conf.d/opennic.conf
+  template:
+    src: opennic.conf
+    dest: "{{nsd_conf_dir}}/conf.d/opennic.conf"
   notify: Restart nsd
   tags: [update-opennic-tlds]
 
