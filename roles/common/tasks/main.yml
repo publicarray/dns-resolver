@@ -17,18 +17,22 @@
 # TASK [jeffwidman.yum-cron : Ensures cron(ie) service is running] ***************
 # fatal: [localhost]: FAILED! => {"changed": false, "failed": true, "msg": "Could not find the requested service crond: host"}
 # to retry, use: --limit @/etc/ansible/test.retry
+
+- debug:
+    msg: "{{ansible_distribution_version}}"
+
 - name: fix crond service
   package:
     name: cronie
     state: present
-  when: ansible_distribution == 'CentOS' and ansible_lsb.major_release|int >= 7
+  when: ansible_distribution == 'CentOS' #and ansible_distribution_version == '7'
 
 - name: enable cronie
   service:
     name: crond
     enabled: yes
     use: service
-  when: ansible_distribution == 'CentOS' and ansible_lsb.major_release|int >= 7
+  when: ansible_distribution == 'CentOS' #and ansible_distribution_version == '7'
 
 #
 # - group:
