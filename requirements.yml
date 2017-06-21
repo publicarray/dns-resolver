@@ -31,10 +31,10 @@
   version: master
   name: jffz.netdata
 
-- src: https://github.com/publicarray/ansible-haproxy
+- src: https://github.com/devops-coop/ansible-haproxy
   scm: git
-  version: patch-1
-  name: publicarray.haproxy
+  version: master
+  name: devops-coop.haproxy
 
 - src: geerlingguy.repo-epel
   version: master
