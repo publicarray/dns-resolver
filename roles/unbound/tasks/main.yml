@@ -16,7 +16,7 @@
   command: unbound-anchor -a /etc/unbound/auto-root.key
   register: unbound_anchor_result
   changed_when: "unbound_anchor_result.rc == 1"
-  ignore_errors: yes
+  failed_when: false # ignore failure silently
   # Return value 1 = updated
   # Return value 0 = no update was necessary, updated with RFC5011tracking, or an error occurred
 
@@ -61,10 +61,12 @@
 
 - name: Configure ports for SELinux (mark udp port for dns)
   command: semanage port -a -t dns_port_t -p udp {{dns_recursor_port}}
+  failed_when: false # ignore failure silently
   when: ansible_selinux
 
 - name: Configure ports for SELinux (mark tcp port for dns)
   command: semanage port -a -t dns_port_t -p tcp {{dns_recursor_port}}
+  failed_when: false # ignore failure silently
   when: ansible_selinux
 
 - name: Ensure unbound is running
