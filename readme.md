@@ -62,7 +62,7 @@ $ service dnsdist start
 ```sh
 pip install molecule # or brew install molecule
 # molecule init --driver <yourdriver>
-# brew install vagrant|docker
+# brew install docker # or brew cask install vagrant virtualbox
 ```
 
 ```sh

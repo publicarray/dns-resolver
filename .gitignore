@@ -1,5 +1,6 @@
 group_vars/all/secrets
-site.retry
+*.retry
 temp
 hosts
 .molecule
+.vagrant

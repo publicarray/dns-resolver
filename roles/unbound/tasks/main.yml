@@ -13,8 +13,7 @@
   check_mode: no
 
 - name: Setup or update of the root trust anchor for DNSSEC validation
-  command: unbound-anchor
-  # command: unbound-anchor -a /etc/unbound/root.key
+  command: unbound-anchor -a /etc/unbound/auto-root.key
   register: unbound_anchor_result
   changed_when: "unbound_anchor_result.rc == 1"
   ignore_errors: yes
@@ -30,16 +29,11 @@
   command: unbound-control-setup
   notify: Restart unbound with cache
 
-- stat:
-    path: /etc/unbound/named.cache
-  register: p
-
 # https://www.internic.net/domain/named.cache
 # Update root.hints every six months or so
 - name: Get root-hints cache
-  # when: not p.stat.exists
   get_url:
-    url: ftp://ftp.internic.net/domain/named.cache
+    url: https://www.internic.net/domain/named.root
     dest: /etc/unbound/root.hints
 
 - name: Set threads variable from shell command
@@ -63,4 +57,4 @@
     name: unbound
     state: started
     enabled: true
-    pattern: "unbound"
+    pattern: unbound

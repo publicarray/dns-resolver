@@ -168,7 +168,8 @@ dnsdist_config: |
   -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
 
   -- DNS over TCP
-  addLocal("127.0.0.1:53", { doTCP=true, reusePort=false, tcpFastOpenSize=0, interface=lo })
+  --addLocal("127.0.0.1:53", { doTCP=true, reusePort=false, tcpFastOpenSize=256, interface=lo })
+  addLocal("127.0.0.1:53", true, false, 256)
 # [netdata]
 netdata: true
 
@@ -202,7 +203,7 @@ haproxy_defaults:
 
 haproxy_listen:
   - name: dns-over-tcp
-    bind: '0.0.0.0:853'
+    bind: 0.0.0.0:853
     log: global
     # option: tcplog
     ssl:

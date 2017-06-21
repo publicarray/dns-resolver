@@ -4,6 +4,12 @@
   shell: echo "Y Y Y" | bash <(curl -Ss https://my-netdata.io/kickstart.sh) --dont-wait --auto-update
   args:
     creates: /usr/src/netdata.git
+    executable: /bin/bash
+
+- name: Create config folder for netdata
+  file:
+    path: /etc/netdata
+    state: directory
 
 - name: Copy netdata config
   template:

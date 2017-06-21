@@ -13,27 +13,20 @@
 
 # ansible_os_family == [RedHat, Debian, Suse, Gentoo, Archlinux, Solaris, Alpine, FreeBSD, OpenBSD]
 
-#fix for:
-# TASK [jeffwidman.yum-cron : Ensures cron(ie) service is running] ***************
-# fatal: [localhost]: FAILED! => {"changed": false, "failed": true, "msg": "Could not find the requested service crond: host"}
-# to retry, use: --limit @/etc/ansible/test.retry
+# fix
+# fatal: [dns-resolver]: FAILED! =>
+# {"changed": true, "exit_status": 1, "failed": true, "msg": "failed to validate",
+# "stderr": "", "stderr_lines": [], "stdout": "The included directory /etc/dnsdist/config.d/ does not exist!\n
+# Fatal error: Unable to convert parameter from no value to N5boost8optionalIbEE
+# \n", "stdout_lines": ["The included directory /etc/dnsdist/config.d/ does not exist!",
+# "Fatal error: Unable to convert parameter from no value to N5boost8optionalIbEE"]}
 
-- debug:
-    msg: "{{ansible_distribution_version}}"
-
-- name: fix crond service
-  package:
-    name: cronie
-    state: present
-  when: ansible_distribution == 'CentOS' #and ansible_distribution_version == '7'
-
-- name: enable cronie
-  service:
-    name: crond
-    enabled: yes
-    use: service
-  when: ansible_distribution == 'CentOS' #and ansible_distribution_version == '7'
-
+- name: create missing folder for dnsdist
+  file:
+    path: /etc/dnsdist/config.d/
+    state: directory
+  when: dnsdist
+  tags: [dnsdist]
 #
 # - group:
 #     name: pdns

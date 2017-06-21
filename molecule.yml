@@ -1,11 +1,15 @@
 ---
+molecule:
+  raw_ssh_args:
+    - -o StrictHostKeyChecking=false
+    - -o UserKnownHostsFile=~/.ssh/known_hosts
 ansible:
   config_file: ./ansible.cfg
 dependency:
   name: galaxy
   requirements_file: requirements.yml
 driver:
-  name: docker # vagrant|docker
+  name: vagrant # vagrant|docker
 docker:
   containers:
     - name: dns-resolver-ubuntu
@@ -19,13 +23,16 @@ docker:
       ansible_groups:
         - group1
 vagrant:
+  raw_config_args:
+    - "ssh.insert_key = false"
+    - "vm.provision \"file\", source: \"~/.ssh/id_rsa.pub\", destination: \"~/.ssh/authorized_keys\""
   platforms:
-    - name: trusty64
-      box: trusty64
-      box_url: https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/14.04/providers/virtualbox.box
-    - name: trusty64
-      box: trusty64
-      box_url: https://vagrantcloud.com/centos/boxes/7/versions/1705.01/providers/virtualbox.box
+    - name: centos7
+      box: centos/7
+      # box_url: https://vagrantcloud.com/centos/boxes/7/versions/1705.01/providers/virtualbox.box
+    - name: ubuntu14
+      box: ubuntu/trusty64
+      # box_url: https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/14.04/providers/virtualbox.box
   providers:
     - name: virtualbox
       type: virtualbox
