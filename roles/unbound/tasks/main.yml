@@ -52,6 +52,21 @@
 - name: Check unbound configuration
   command: unbound-checkconf
 
+# SELinux
+- name: Configure ports for SELinux (install policycoreutils-python)
+  package:
+    name: policycoreutils-python # for semanage
+    state: present
+  when: ansible_selinux
+
+- name: Configure ports for SELinux (mark udp port for dns)
+  command: semanage port -a -t dns_port_t -p udp {{dns_recursor_port}}
+  when: ansible_selinux
+
+- name: Configure ports for SELinux (mark tcp port for dns)
+  command: semanage port -a -t dns_port_t -p tcp {{dns_recursor_port}}
+  when: ansible_selinux
+
 - name: Ensure unbound is running
   service:
     name: unbound

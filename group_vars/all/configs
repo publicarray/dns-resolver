@@ -46,9 +46,6 @@ nsd_minimal_responses: "no"
 # [DNS]
 dns_recursor: 'unbound' # [pdns_recursor|unbound]
 dns_recursor_port: '56'
-# for SELinux remember to do:
-#semanage port -a -t dns_port_t -p udp 56
-#semanage port -a -t dns_port_t -p tcp 56
 
 # [unbound]
 # see roles/unbound/template/unbound.config file for configs
