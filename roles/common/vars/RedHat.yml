@@ -5,3 +5,4 @@ _packages:
   - git
   - yum-utils # needs-restarting
   - bind-utils # dig command
+  - deltarpm # smaller downloads but more processing time

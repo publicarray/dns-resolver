@@ -3,7 +3,7 @@
 --utility function
 function file_exists(name)
   local f=io.open(name,"r")
-  if f~=nil then f.close() return true else return false end
+  if f==nil then return false else f:close() return true end
 end
 
 

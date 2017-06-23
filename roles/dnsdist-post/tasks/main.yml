@@ -9,25 +9,29 @@
     state: directory
   tags: [dnsdist_post, dnsdist]
 
-- name: Copy custom.conf for dnsdist service - systemd (Drops dnsdist privilege)
+- name: Copy custom.confs service - systemd (Drops dnsdist privilege)
   template:
     src: custom.conf
     dest: /etc/systemd/system/dnsdist.service.d/custom.conf
   notify: Restart dnsdist
   tags: [dnsdist_post, dnsdist]
 
-- name: Copy functions.lua for dnsdist
+- name: Copy functions.lua
   template:
     src: 01functions.lua
     dest: /etc/dnsdist/config.d/01functions.conf
   notify: Restart dnsdist
   tags: [dnsdist_post, dnsdist]
 
-- name: Copy dnscrypt.lua for dnsdist
+- name: Copy dnscrypt.lua
   template:
     src: 02dnscrypt.lua
     dest: /etc/dnsdist/config.d/02dnscrypt.conf
   notify: Restart dnsdist
+  tags: [dnsdist_post, dnsdist]
+
+- name: Check config(also creates the certs and keys)
+  command: dnsdist --check-config
   tags: [dnsdist_post, dnsdist]
 
 - name: Ensure dnsdist is running

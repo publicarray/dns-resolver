@@ -148,7 +148,7 @@ dnsdist_config: |
   -- Simple abuse protection
   setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
   addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) -- drop update queries and classes that are not for the internet
-  -- addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
+  addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
   addDelay(MaxQPSIPRule(10, 32, 48), 200) --add 200ms delay to IPs with greater than 10qps (queries per second)
 
   includeDirectory("/etc/dnsdist/config.d/")
@@ -165,8 +165,8 @@ dnsdist_config: |
   -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
 
   -- DNS over TCP
-  --addLocal("127.0.0.1:53", { doTCP=true, reusePort=false, tcpFastOpenSize=256, interface=lo })
-  addLocal("127.0.0.1:53", true, false, 256)
+  --addLocal("127.0.0.1:53", { doTCP=true, reusePort=false, tcpFastOpenSize=256, interface=lo }) -- v.master
+  addLocal("127.0.0.1:53", true, false, 256) -- v.11
 # [netdata]
 netdata: false
 
