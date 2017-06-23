@@ -149,12 +149,12 @@ dnsdist_config: |
   setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
   addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) -- drop update queries and classes that are not for the internet
   -- addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
-  addDelay(MaxQPSIPRule(10, 32, 48), 200) --add 200ms delay to IPs with grater than 10qps (queries per second)
+  addDelay(MaxQPSIPRule(10, 32, 48), 200) --add 200ms delay to IPs with greater than 10qps (queries per second)
 
   includeDirectory("/etc/dnsdist/config.d/")
 
   function maintenance()
-    addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 300) --block IPs grater than 20qps in 10 sec for 5 min
+    addDynBlocks(exceedQRate(20, 10), "Exceeded query rate", 300) --block IPs greater than 20qps in 10 sec for 5 min
     addDynBlocks(exceedRespByterate(3000, 10), "Exceeded byte rate", 300) --block IPs that request more than 3000 bytes/s in 10sec for 5 min
     -- renew()
   end
@@ -168,7 +168,7 @@ dnsdist_config: |
   --addLocal("127.0.0.1:53", { doTCP=true, reusePort=false, tcpFastOpenSize=256, interface=lo })
   addLocal("127.0.0.1:53", true, false, 256)
 # [netdata]
-netdata: true
+netdata: false
 
 # /etc/netdata/netdata.conf
 # /etc/netdata/health_alarm_notify.conf
