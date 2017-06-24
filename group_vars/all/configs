@@ -138,7 +138,7 @@ dnsdist_config: |
 
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
-  newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", order=1, tcpFastOpen=true})
+  newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", order=1})
   --[[
   newServer({address="208.67.222.222", name="OpenDNS", order=100}) --last resort/fallback
   newServer({address="208.67.220.220", name="OpenDNS", order=100}) --last resort/fallback
@@ -165,8 +165,8 @@ dnsdist_config: |
   -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
 
   -- DNS over TCP
-  --addLocal("127.0.0.1:53", { doTCP=true, reusePort=false, tcpFastOpenSize=256, interface=lo }) -- v.master
-  addLocal("127.0.0.1:53", true, false, 256) -- v.11
+  --addLocal("127.0.0.1:53", { doTCP=true, interface=lo }) -- v.master
+  --addLocal("127.0.0.1:53", true, false, 0) -- v.11
 # [netdata]
 netdata: false
 
