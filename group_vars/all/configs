@@ -135,7 +135,7 @@ dnsdist_config: |
   setTCPRecvTimeout(3) --client timeout 3 sec
   setStaleCacheEntriesTTL(86400) --86400sec = 24h
   setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin,leastOutstanding
-
+  --setRingBuffersSize(500) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", order=1})
@@ -149,7 +149,7 @@ dnsdist_config: |
   setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
   addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) -- drop update queries and classes that are not for the internet
   addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
-  addDelay(MaxQPSIPRule(10, 32, 48), 200) --add 200ms delay to IPs with greater than 10qps (queries per second)
+  addDelay(MaxQPSIPRule(15, 32, 48), 200) --add 200ms delay to IPs with greater than 15qps (queries per second)
 
   includeDirectory("/etc/dnsdist/config.d/")
 
