@@ -20,6 +20,15 @@
     state: directory
   notify: Restart nsd
 
+- name: Create zonefiles directory
+  file:
+    path: "{{ nsd_zonesdir }}"
+    mode: 0750
+    owner: "{{ nsd_user }}"
+    group: "{{ nsd_group }}"
+    state: directory
+  notify: Restart nsd
+
 - name: Create nsd.conf
   template:
     src: nsd.conf
@@ -55,6 +64,23 @@
     dest: "{{nsd_conf_dir}}/conf.d/opennic.conf"
   notify: Restart nsd
   tags: [update-opennic-tlds]
+
+# SELinux
+- name: Configure ports for SELinux (install policycoreutils-python)
+  package:
+    name: policycoreutils-python # for semanage
+    state: present
+  when: ansible_selinux
+
+- name: Configure ports for SELinux (mark udp port for dns)
+  command: semanage port -a -t dns_port_t -p udp {{nsd_port}}
+  failed_when: false # ignore failure silently
+  when: ansible_selinux
+
+- name: Configure ports for SELinux (mark tcp port for dns)
+  command: semanage port -a -t dns_port_t -p tcp {{nsd_port}}
+  failed_when: false # ignore failure silently
+  when: ansible_selinux
 
 - name: Ensure nsd is running
   service:
