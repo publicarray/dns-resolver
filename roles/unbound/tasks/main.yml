@@ -13,7 +13,7 @@
   check_mode: no
 
 - name: Setup or update of the root trust anchor for DNSSEC validation
-  command: unbound-anchor -a /etc/unbound/auto-root.key
+  command: unbound-anchor -a /var/lib/unbound/root.key
   register: unbound_anchor_result
   changed_when: "unbound_anchor_result.rc == 1"
   failed_when: false # ignore failure silently
