@@ -194,7 +194,8 @@ dnsdist_config: |
   --General settings
   setACL({'0.0.0.0/0', '::/0'}) --allow WWW
   controlSocket("127.0.0.1")
-  setTCPRecvTimeout(3) --client timeout 3 sec
+  setTCPRecvTimeout(3) --client timeout
+  setTCPSendTimeout(5)
   setStaleCacheEntriesTTL(86400) --86400sec = 24h
   setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin,leastOutstanding
   --setRingBuffersSize(500) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
