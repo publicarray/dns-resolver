@@ -1,13 +1,14 @@
 ## ansible
 
 Get facts: `ansible all -m setup -i hosts -u root`
+Get facts-localhost: `ansible all -m setup -i "localhost," -c local`
 
 ## dnsdist
 
 http://www.networksorcery.com/enp/protocol/dns.htm
 http://dnsdist.org/README/
 
-### stats
+### stats/debugging
 
 ```lua
 showVersion()
@@ -19,9 +20,12 @@ topQueries(20)
 topClients(5)
 topBandwidth(10)
 -- https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml
+topResponses(20) -- SERVFAIL = 2
 topResponses(20, 3) -- NXDOMAIN = 3
-topResponses(20, 2) -- SERVFAIL = 2
 grepq("0.0.0.0", 25)
+grepq("2000ms", 25)
+showBinds()
+showTCPStats()
 ```
 
 ### actions/rules
@@ -33,7 +37,7 @@ addAction(makeRule("0.0.0.0"), TCAction())
 addAction(makeRule("0.0.0.0"), DropAction())
 addAction(makeRule("0.0.0.0"), TeeAction("8.8.8.8")) -- send queries to 8.8.8.8 and cache response
 addDomainSpoof("example.com", "127.0.0.1")
-addDomainBlock("google.com")
+addDomainBlock("exmple.com")
 
 addDelay({"0.0.0.0", "example.com"}, 200)
 addAction(makeRule("0.0.0.0"), DelayAction(200))
@@ -46,7 +50,7 @@ addAction(MaxQPSIPRule(5), NoRecurseAction())
 
 addAction(NotRule(QClassRule(1)), DropAction()) --Drop Queries that are not the internet class
 addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) --Drop Queries that are not the internet class or use the update command
-addAction("10.in-addr.arpa.", RCodeAction(3)) --nxdomain for private ips 10.0.0.0/8
+addAction("example.com", RCodeAction(3)) --nxdomain for example.com
 
 rmRule(2)
 ```
@@ -387,7 +391,6 @@ https://github.com/Sinodun/dnsperf-tcp
 
 ### TCP fast open
 
-/etc/sysctl.d/tcp-fast-open.conf
 
 /etc/sysctl.conf
 
@@ -396,6 +399,11 @@ net.ipv4.tcp_fastopen = 3
 ```
 
 ```sh
+echo "3" > /proc/sys/net/ipv4/tcp_fastopen
+sudo sysctl -w net.ipv4.tcp_fastopen=3
+echo "net.ipv4.tcp_fastopen=3" > /etc/sysctl.d/30-tcp_fastopen.conf
 sysctl --system
 sysctl -p
+reboot
+cat /proc/sys/net/ipv4/tcp_fastopen
 ```
