@@ -214,7 +214,7 @@ dnsdist_config: |
   setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
   addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) -- drop update queries and classes that are not for the internet
   addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
-  addDelay(MaxQPSIPRule(20, 32, 48), 50) --add 20ms delay to IPs with greater than 20qps (queries per second)
+  addDelay(MaxQPSIPRule(20, 32, 48), 50) --add 50ms delay to IPs with greater than 20qps (queries per second)
   addAction(MaxQPSIPRule(25), TCAction()) --ask for tcp when traffic is greater than 25 qps per ip
   --addAction(MaxQPSIPRule(50), NoRecurseAction()) --strips the Recursion Desired (RD) bit from traffic greater than 30 qps per ip
 
