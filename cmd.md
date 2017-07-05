@@ -26,6 +26,8 @@ grepq("0.0.0.0", 25)
 grepq("2000ms", 25)
 showBinds()
 showTCPStats()
+showRules()
+showDynBlocks()
 ```
 
 ### actions/rules
@@ -51,8 +53,24 @@ addAction(MaxQPSIPRule(5), NoRecurseAction())
 addAction(NotRule(QClassRule(1)), DropAction()) --Drop Queries that are not the internet class
 addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) --Drop Queries that are not the internet class or use the update command
 addAction("example.com", RCodeAction(3)) --nxdomain for example.com
+addAction(RegexRule("[0-9]{4,}\\.cn$"), DropAction())
 
 rmRule(2)
+mvRule(from, to)
+```
+
+### dynamic rules
+
+```lua
+-- This blocks IP addresses doing more than 10 queries/s over 10 seconds
+function maintenance()
+    addDynBlocks(exceedQRate(10, 10), "Exceeded query rate", 60)
+end
+
+exceedServFails(rate, seconds) -- exceed rate servails/s over seconds seconds
+exceedNXDOMAINs(rate, seconds) -- exceed rate NXDOMAIN/s over seconds seconds
+exceedRespByterate(rate, seconds) -- exeeded rate bytes/s answers over seconds seconds
+exceedQTypeRate(type, rate, seconds) -- exceed rate queries/s for queries of type type over seconds seconds
 ```
 
 ## iptables
@@ -65,8 +83,6 @@ iptables -L -n -v
 iptables -L --line-numbers
 iptables -D INPUT 2
 ```
-
-
 
 # Test DNS
 

@@ -64,8 +64,10 @@ unbound_server:
   key-cache-slabs: 2
   infra-cache-slabs: 2
   neg-cache-size: 4m
-  cache-min-ttl: 900 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard
-  cache-max-ttl: 86400 # 14400=4h 86400=1day
+  cache-min-ttl: 900 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
+  cache-max-ttl: 86400 # 14400=4h 86400=1day (default)
+  # cache-max-negative-ttl: 3600 # 1h (default)
+  infra-host-ttl: 3600 # 1h, 900=15min (default)
   access-control: [0.0.0.0/0 deny, 127.0.0.1 allow]
   chroot: ""
   directory: "/etc/unbound"
@@ -212,7 +214,7 @@ dnsdist_config: |
   setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
   addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) -- drop update queries and classes that are not for the internet
   addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
-  addDelay(MaxQPSIPRule(20, 32, 48), 200) --add 200ms delay to IPs with greater than 20qps (queries per second)
+  addDelay(MaxQPSIPRule(20, 32, 48), 50) --add 20ms delay to IPs with greater than 20qps (queries per second)
   addAction(MaxQPSIPRule(25), TCAction()) --ask for tcp when traffic is greater than 25 qps per ip
   --addAction(MaxQPSIPRule(50), NoRecurseAction()) --strips the Recursion Desired (RD) bit from traffic greater than 30 qps per ip
 
