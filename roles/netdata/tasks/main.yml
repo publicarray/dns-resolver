@@ -17,6 +17,29 @@
     dest: /etc/netdata/netdata.conf
   notify: Restart netdata
 
+- name: Copy dns_query_time.conf
+  template:
+    src: dns_query_time.conf
+    dest: /etc/netdata/python.d/dns_query_time.conf
+  notify: Restart netdata
+
+- name: Copy nsd.conf
+  template:
+    src: nsd.conf
+    dest: /etc/netdata/python.d/nsd.conf
+  notify: Restart netdata
+
+- name: Copy /etc/sudoers.d/netdata for nsd
+  template:
+    src: sudo-netdata
+    dest: /etc/sudoers.d/netdata
+
+- name: Copy haproxy.conf
+  template:
+    src: haproxy.conf
+    dest: /etc/netdata/python.d/haproxy.conf
+  notify: Restart netdata
+
 - name: Copy netdata health-alarm-notify config
   template:
     src: health_alarm_notify.conf

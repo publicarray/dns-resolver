@@ -112,6 +112,8 @@ unbound_server:
     - lan. static
     - local. static
     - localdomain. static
+    - internal. static
+    - virtualmin. static
     - test. static
     - "2.dnscrypt-cert.{{ ansible_hostname }} refuse"
 
@@ -232,6 +234,8 @@ dnsdist_config: |
   -- carbonServer("37.252.122.50")
   -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
 
+  addAction("tracker.publicbt.com", RCodeAction(3))
+
   -- DNS over TCP
   --addLocal("127.0.0.1:53", { doTCP=true, interface=lo }) -- v.master
   --addLocal("127.0.0.1:53", true, false, 0) -- v.11
@@ -253,6 +257,10 @@ dns_over_tcp_cert:
 
 # [haproxy]
 haproxy_global:
+# netdata
+# stats socket /var/run/haproxy.sock mode 660 level operator group netdata
+# stats timeout 2m #Wait up to 2 minutes for input
+
   log:
     - address: 127.0.0.1
       facility: user
@@ -265,6 +273,16 @@ haproxy_global:
 
 haproxy_defaults:
   mode: tcp
+    # log global
+    # mode tcp
+    # balance roundrobin
+    # timeout http-request 10s
+    # timeout queue 1m
+    # timeout connect 10s
+    # timeout client 30m
+    # timeout server 30m
+    # timeout http-keep-alive 30m
+    # timeout check 1m
 
 haproxy_listen:
   - name: dns-over-tcp

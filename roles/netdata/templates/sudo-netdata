@@ -1,0 +1,2 @@
+Defaults:netdata   !requiretty
+netdata ALL=(ALL)  NOPASSWD: /usr/sbin/nsd-control stats_noreset
