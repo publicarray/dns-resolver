@@ -50,24 +50,25 @@ dns_recursor_port: '56'
 # [unbound] https://www.unbound.net/
 # https://www.unbound.net/documentation/unbound.conf.html
 unbound_server:
-  verbosity: 1
+  verbosity: 0 # only errors
   port: "{{dns_recursor_port}}"
-  statistics-interval: 86400
+  statistics-interval: 86400 # once a day
   interface: [127.0.0.1, '::1']
   outgoing-range: 32767
   outgoing-port-avoid: 5546 # fix unable to bind to port error (centOS)
   so-rcvbuf: 4m
   so-sndbuf: 4m
   num-queries-per-thread: 4096
-  msg-cache-slabs: 2
-  rrset-cache-slabs: 2
-  key-cache-slabs: 2
-  infra-cache-slabs: 2
+  # msg-cache-slabs: 1
+  # rrset-cache-slabs: 1
+  # key-cache-slabs: 1
+  # infra-cache-slabs: 1
   neg-cache-size: 4m
   cache-min-ttl: 900 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
   cache-max-ttl: 86400 # 14400=4h 86400=1day (default)
   # cache-max-negative-ttl: 3600 # 1h (default)
   infra-host-ttl: 3600 # 1h, 900=15min (default)
+  infra-cache-numhosts: 50000
   access-control: [0.0.0.0/0 deny, 127.0.0.1 allow]
   chroot: ""
   directory: "/etc/unbound"
@@ -100,7 +101,7 @@ unbound_server:
   rrset-roundrobin: yes
   minimal-responses: yes
   auto-trust-anchor-file: "/var/lib/unbound/root.key"
-  val-log-level: 2
+  val-log-level: 2 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
   local-zone:
     - belkin. static
     - corp. static
@@ -198,6 +199,7 @@ dnsdist_config: |
   controlSocket("127.0.0.1")
   setTCPRecvTimeout(3) --client timeout
   setTCPSendTimeout(5)
+  --setTCPUseSinglePipe(true) --v.Master
   setStaleCacheEntriesTTL(86400) --86400sec = 24h
   setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin,leastOutstanding
   --setRingBuffersSize(500) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
