@@ -17,6 +17,7 @@ dumpStats()
 getPool(""):getCache():printStats()
 showResponseLatency()
 topQueries(20)
+topSlow(10)
 topClients(5)
 topBandwidth(10)
 -- https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml
@@ -24,6 +25,7 @@ topResponses(20) -- SERVFAIL = 2
 topResponses(20, 3) -- NXDOMAIN = 3
 grepq("0.0.0.0", 25)
 grepq("2000ms", 25)
+grepq("", 10) -- last 10 queries
 showBinds()
 showTCPStats()
 showRules()
@@ -117,6 +119,7 @@ sudo nano /etc/stubby.conf
 { resolution_type: GETDNS_RESOLUTION_STUB
 , dns_transport_list: [ GETDNS_TRANSPORT_TLS ]
 , tls_authentication: GETDNS_AUTHENTICATION_REQUIRED
+, tls_connection_retries: 9999999999
 , tls_query_padding_blocksize: 256
 , edns_client_subnet_private : 1
 , idle_timeout: 10000
@@ -127,7 +130,7 @@ sudo nano /etc/stubby.conf
     , tls_port: 60
   },
   { address_data: 0::1
-    , address_type: "IPv7"
+    , address_type: "IPv6"
     , port: 60
     , tls_port: 60
   }, ]

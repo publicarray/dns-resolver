@@ -116,6 +116,11 @@ unbound_server:
     - virtualmin. static
     - test. static
     - "2.dnscrypt-cert.{{ ansible_hostname }} refuse"
+# unbound_tls:
+#   private_key: /etc/haproxy/dns.seby.io/privkey.pem
+#   cert: /etc/haproxy/dns.seby.io/cert.pem
+#   port: 854
+  # port: 853 # default
 
 # [pdns_recursor] https://doc.powerdns.com/md/recursor/settings/
 # pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_40 }}"
@@ -181,8 +186,8 @@ dnscrypt_wrapper: false
 # https://github.com/PowerDNS/dnsdist-ansible
 dnsdist: true
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_10 }}"
-dnsdist_install_repo: "{{ dnsdist_powerdns_repo_11 }}"
-# dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
+# dnsdist_install_repo: "{{ dnsdist_powerdns_repo_11 }}"
+dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
 dnsdist_locals: []
 dnsdist_controlsocket: "127.0.0.1"
 # dnsdist_setkey: "" # Change this
@@ -201,10 +206,10 @@ dnsdist_config: |
   controlSocket("127.0.0.1")
   setTCPRecvTimeout(3) --client timeout
   setTCPSendTimeout(5)
-  --setTCPUseSinglePipe(true) --v.Master
+  setTCPUseSinglePipe(true) --v.Master
   setStaleCacheEntriesTTL(86400) --86400sec = 24h
   setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin,leastOutstanding
-  --setRingBuffersSize(500) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
+  setRingBuffersSize(1000) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", order=1})
@@ -224,9 +229,13 @@ dnsdist_config: |
 
   includeDirectory("/etc/dnsdist/config.d/")
 
+  local last = 0
+  serial = 0
   function maintenance()
     addDynBlocks(exceedQRate(100, 10), "Exceeded query rate", 900) --block IPs greater than 100qps over 10 sec for 15 min
     addDynBlocks(exceedRespByterate(8000, 10), "Exceeded byte rate", 600) --block IPs that request more than 8000 bytes/s over 10sec for 10 min
+
+    autoRenewCert()
   end
 
   -- Statistics
@@ -235,6 +244,12 @@ dnsdist_config: |
   -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
 
   addAction("tracker.publicbt.com", RCodeAction(3))
+  addAction("pirates.sumotracker.com", RCodeAction(2))
+  addAction("www.sumotracker.com", RCodeAction(2))
+  addAction("sumotracker.com", RCodeAction(2))
+  -- addAction("tracker.prq.to", RCodeAction(2))
+  addAction("tracker.flashtorrents.org", RCodeAction(2))
+  addAction("flashtorrents.org", RCodeAction(2))
 
   -- DNS over TCP
   --addLocal("127.0.0.1:53", { doTCP=true, interface=lo }) -- v.master
