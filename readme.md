@@ -13,9 +13,6 @@ $ ansible-playbook playbook.yml -i hosts --syntax-check
 $ ansible-playbook playbook.yml -i hosts --check --diff
 ```
 
-
-## TODO auto certificate rotations
-
 ## Post install
 
 Generate new keys (optional - this is done automatically)
@@ -25,7 +22,7 @@ $ service dnsdist stop
 $ dnsdist
 
 > generateDNSCryptProviderKeys("/etc/dnsdist/providerPublic.key", "/etc/dnsdist/providerPrivate.key")
-> generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key", 0, os.time(), os.time()+(365*86400))
+> generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0", 0, os.time(), os.time()+(365*86400))
 > shutdown()
 
 $ service dnsdist start
@@ -38,19 +35,6 @@ $ dnsdist --client
 
 > printDNSCryptProviderFingerprint("/etc/dnsdist/providerPublic.key")
 > quit
-```
-
-## Renew cert (required to do this once a year)
-
-```sh 
-$ service dnsdist stop
-$ dnsdist
-
-> generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert", "/etc/dnsdist/resolver.key", 0, os.time(), os.time()+(365*86400))
-> shutdown()
-
-$ service dnsdist start
-
 ```
 
 # Test
