@@ -6,7 +6,7 @@
     state: present
 
 - name: Set cache_memory variable from shell command
-  shell: "echo $(($(($((1024 * $((fgrep MemAvailable /proc/meminfo || fgrep MemTotal /proc/meminfo) | sed 's/[^0-9]//g' ))) - 12582912)) / 3))"
+  shell: "echo $(($(($((1024 * $((fgrep MemAvailable /proc/meminfo || fgrep MemTotal /proc/meminfo) | sed 's/[^0-9]//g' ))) - 12582912)) / 4))"
   args:
     executable: /bin/bash
   register: cache_memory
@@ -51,6 +51,7 @@
 
 - name: Check unbound configuration
   command: unbound-checkconf
+  check_mode: no
 
 # SELinux
 - name: Configure ports for SELinux (install policycoreutils-python)

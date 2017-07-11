@@ -49,17 +49,18 @@ dns_recursor_port: '56'
 
 # [unbound] https://www.unbound.net/
 # https://www.unbound.net/documentation/unbound.conf.html
+# https://www.unbound.net/documentation/howto_optimise.html
 unbound_server:
   verbosity: 0 # only errors
   port: "{{dns_recursor_port}}"
-  statistics-interval: 86400 # once a day
+  statistics-interval: 86400 # once a day print latency statistics
   interface: [127.0.0.1, '::1']
-  outgoing-range: 32767
+  num-queries-per-thread: 4096
+  outgoing-range: 8192 # (num-queries-per-thread * 2)
   outgoing-port-avoid: 5546 # fix unable to bind to port error (centOS)
   so-rcvbuf: 4m
   so-sndbuf: 4m
-  num-queries-per-thread: 4096
-  # msg-cache-slabs: 1
+  # msg-cache-slabs: 1 # power of 2 close to num-threads
   # rrset-cache-slabs: 1
   # key-cache-slabs: 1
   # infra-cache-slabs: 1
@@ -209,7 +210,7 @@ dnsdist_config: |
   setTCPUseSinglePipe(true) --v.Master
   setStaleCacheEntriesTTL(86400) --86400sec = 24h
   setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin,leastOutstanding
-  setRingBuffersSize(1000) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
+  setRingBuffersSize(250) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", order=1})
@@ -223,8 +224,8 @@ dnsdist_config: |
   setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
   addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) -- drop update queries and classes that are not for the internet
   addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
-  addDelay(MaxQPSIPRule(20, 32, 48), 50) --add 50ms delay to IPs with greater than 20qps (queries per second)
-  addAction(MaxQPSIPRule(25), TCAction()) --ask for tcp when traffic is greater than 25 qps per ip
+  addAction(MaxQPSIPRule(50), TCAction()) --ask for tcp when traffic is greater than 50 qps per ip
+  --addDelay(MaxQPSIPRule(50, 32, 48), 100) --add 50ms delay to IPs with greater than 50qps (queries per second)
   --addAction(MaxQPSIPRule(50), NoRecurseAction()) --strips the Recursion Desired (RD) bit from traffic greater than 30 qps per ip
 
   includeDirectory("/etc/dnsdist/config.d/")
@@ -240,14 +241,13 @@ dnsdist_config: |
 
   -- Statistics
   -- webserver("127.0.0.1:8083", "mysuperpass")
-  -- carbonServer("37.252.122.50")
+  carbonServer("37.252.122.50")
   -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
 
   addAction("tracker.publicbt.com", RCodeAction(3))
   addAction("pirates.sumotracker.com", RCodeAction(2))
   addAction("www.sumotracker.com", RCodeAction(2))
   addAction("sumotracker.com", RCodeAction(2))
-  -- addAction("tracker.prq.to", RCodeAction(2))
   addAction("tracker.flashtorrents.org", RCodeAction(2))
   addAction("flashtorrents.org", RCodeAction(2))
 
