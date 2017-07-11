@@ -233,8 +233,8 @@ dnsdist_config: |
   local last = 0
   serial = 0
   function maintenance()
-    addDynBlocks(exceedQRate(100, 10), "Exceeded query rate", 900) --block IPs greater than 100qps over 10 sec for 15 min
-    addDynBlocks(exceedRespByterate(8000, 10), "Exceeded byte rate", 600) --block IPs that request more than 8000 bytes/s over 10sec for 10 min
+    addDynBlocks(exceedQRate(100, 10), "Exceeded query rate", 600) --block IPs greater than 100qps over 10 sec for 10 min
+    addDynBlocks(exceedRespByterate(20000, 10), "Exceeded byte rate", 600) --block IPs that request more than 10 kilobytes/s over 10sec for 10 min
 
     autoRenewCert()
   end
