@@ -3,7 +3,7 @@
   hosts: all
   remote_user: root
   roles:
-    - { role: geerlingguy.repo-epel, when: ansible_os_family == 'RedHat' , tags: [init] }
+    - { role: geerlingguy.repo-epel, when: ansible_os_family == 'RedHat', tags: [init] }
     - { role: common, tags: [init] }
     - { role: jnv.unattended-upgrades, when: ansible_os_family == 'Darwin', tags: [init] }
     - { role: jeffwidman.yum-cron, when: ansible_os_family == 'RedHat', tags: [init] }

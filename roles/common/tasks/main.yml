@@ -1,6 +1,7 @@
 ---
 
-- include_vars:
+- name: read platform variables
+  include_vars:
     file: "{{ ansible_os_family }}.yml"
   tags: [always]
 

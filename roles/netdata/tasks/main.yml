@@ -46,4 +46,3 @@
     dest: /etc/netdata/health_alarm_notify.conf
   notify: Restart netdata
   no_log: true
-

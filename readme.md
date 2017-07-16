@@ -53,8 +53,18 @@ pip install molecule # or brew install molecule
 molecule test
 ```
 
-## with docker
+## Linting & Formatting
+
+```
+pip install yamllint 
+pip install ansible-lint # may overwrite /usr/local/bin/ansible
+yamllint **/*.yml *.yml
+ansible-lint playbook.yml 
+```
+
+<!-- ## with docker
 
 ```sh
 docker build -f docker/Dockerfile-ubuntu16.04 -t dns-ubuntu16.04 .
 ```
+ -->

@@ -25,9 +25,9 @@ nsd_remote_control: "no"
 nsd_control_interface: [ "127.0.0.1" ]
 nsd_control_port: 8952
 
-nsd_server_key_file:   "{{ nsd_conf_dir }}/nsd_server.key"
-nsd_server_cert_file:  "{{ nsd_conf_dir }}/nsd_server.pem"
-nsd_control_key_file:  "{{ nsd_conf_dir }}/nsd_control.key"
+nsd_server_key_file: "{{ nsd_conf_dir }}/nsd_server.key"
+nsd_server_cert_file: "{{nsd_conf_dir }}/nsd_server.pem"
+nsd_control_key_file: "{{ nsd_conf_dir }}/nsd_control.key"
 nsd_control_cert_file: "{{ nsd_conf_dir }}/nsd_control.pem"
 
 nsd_custom_server_config:
