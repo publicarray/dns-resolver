@@ -242,11 +242,7 @@ dnsdist_config: |
   -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
 
   addAction("tracker.publicbt.com", RCodeAction(3))
-  addAction("pirates.sumotracker.com", RCodeAction(2))
-  addAction("www.sumotracker.com", RCodeAction(2))
-  addAction("sumotracker.com", RCodeAction(2))
   addAction("tracker.flashtorrents.org", RCodeAction(2))
-  addAction("flashtorrents.org", RCodeAction(2))
 
   -- DNS over TCP
   --addLocal("127.0.0.1:53", { doTCP=true, interface=lo }) -- v.master
