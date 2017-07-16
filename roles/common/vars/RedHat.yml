@@ -4,5 +4,7 @@ _packages:
   - htop
   - git
   - yum-utils # needs-restarting
-  - bind-utils # dig command
+  - bind-utils # dig
   - deltarpm # smaller downloads but more processing time
+  - net-tools # netstat
+  - iproute # ip

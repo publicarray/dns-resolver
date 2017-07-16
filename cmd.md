@@ -418,11 +418,19 @@ net.ipv4.tcp_fastopen = 3
 ```
 
 ```sh
+# temp
 echo "3" > /proc/sys/net/ipv4/tcp_fastopen
 sudo sysctl -w net.ipv4.tcp_fastopen=3
+
+# permanent
 echo "net.ipv4.tcp_fastopen=3" > /etc/sysctl.d/30-tcp_fastopen.conf
 sysctl --system
 sysctl -p
 reboot
 cat /proc/sys/net/ipv4/tcp_fastopen
+
+# monitor
+grep '^TcpExt:' /proc/net/netstat | cut -d ' ' -f 87-92  | column -t
+ip tcp_metrics show 127.0.0.1
+ip tcp_metrics
 ```

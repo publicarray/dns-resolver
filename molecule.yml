@@ -33,6 +33,8 @@ vagrant:
     - name: ubuntu14
       box: ubuntu/trusty64
       # box_url: https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/14.04/providers/virtualbox.box
+    - name: freeBSD
+      box: freebsd/FreeBSD-11.0-CURRENT
   providers:
     - name: virtualbox
       type: virtualbox

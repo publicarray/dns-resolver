@@ -35,27 +35,6 @@ function autoRenewCert() -- called approx. every second in maintenance function
   if ((now - last) > 82500) then
     serial = serial + 1
 
-    -- create and load new cert
-    -- newCert = "/etc/dnsdist/resolver.cert." .. serial
-    -- newKey = "/etc/dnsdist/resolver.key." .. serial
-    -- generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", newCert, newKey, serial, now - 60 , now + 86400)
-    -- getDNSCryptBind(0):loadNewCertificate(newCert, newKey)
-    -- getDNSCryptBind(1):loadNewCertificate(newCert, newKey)
-    -- getDNSCryptBind(2):loadNewCertificate(newCert, newKey)
-    -- getDNSCryptBind(3):loadNewCertificate(newCert, newKey)
-    -- getDNSCryptBind(4):loadNewCertificate(newCert, newKey)
-    -- getDNSCryptBind(5):loadNewCertificate(newCert, newKey)
-    -- getDNSCryptBind(6):loadNewCertificate(newCert, newKey)
-
-    -- -- cleanup old files
-    -- local oldCert = "/etc/dnsdist/resolver.cert." .. (serial - 2)
-    -- local oldkey = "/etc/dnsdist/resolver.key." .. (serial - 2)
-    -- if file_exists(oldCert) == true
-    -- then
-    --   os.remove(oldCert)
-    --   os.remove(oldkey)
-    -- end
-
     getDNSCryptBind(0):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
     getDNSCryptBind(1):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
     getDNSCryptBind(2):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
