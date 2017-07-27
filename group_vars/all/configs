@@ -1,4 +1,5 @@
 ---
+ansible_python_interpreter: "/usr/bin/env python"
 custom_packages:
   - htop
 
@@ -53,54 +54,54 @@ dns_recursor_port: '56'
 unbound_server:
   verbosity: 0 # only errors
   port: "{{dns_recursor_port}}"
-  statistics-interval: 86400 # once a day print latency statistics
+  statistics_interval: 86400 # once a day print latency statistics
   interface: [127.0.0.1, '::1']
-  num-queries-per-thread: 4096
-  jostle-timeout: 300
-  outgoing-range: 8192 # (num-queries-per-thread * 2)
-  outgoing-port-avoid: 5546 # fix unable to bind to port error (centOS)
-  so-rcvbuf: 4m
-  so-sndbuf: 4m
-  neg-cache-size: 25m
-  cache-min-ttl: 600 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
-  cache-max-ttl: 86400 # 14400=4h 86400=1day (default)
-  # cache-max-negative-ttl: 3600 # 1h (default)
-  infra-host-ttl: 3600 # 1h, 900=15min (default)
-  infra-cache-numhosts: 50000
-  access-control: [0.0.0.0/0 deny, 127.0.0.1 allow]
+  num_queries_per_thread: 4096
+  jostle_timeout: 300
+  outgoing_range: 8192 # (num-queries-per-thread * 2)
+  outgoing_port_avoid: 5546 # fix unable to bind to port error (centOS)
+  so_rcvbuf: 4m
+  so_sndbuf: 4m
+  neg_cache_size: 25m
+  cache_min_ttl: 600 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
+  cache_max_ttl: 86400 # 14400=4h 86400=1day (default)
+  # cache_max_negative_ttl: 3600 # 1h (default)
+  infra_host_ttl: 3600 # 1h, 900=15min (default)
+  infra_cache_numhosts: 50000
+  access_control: [0.0.0.0/0 deny, 127.0.0.1 allow]
   chroot: ""
   directory: "/etc/unbound"
-  use-syslog: yes
-  log-time-ascii: yes
-  root-hints: "/etc/unbound/root.hints"
-  hide-identity: yes
-  hide-version: yes
-  harden-short-bufsize: yes
-  harden-large-queries: yes
-  harden-below-nxdomain: yes
+  use_syslog: yes
+  log_time_ascii: yes
+  root_hints: "/etc/unbound/root.hints"
+  hide_identity: yes
+  hide_version: yes
+  harden_short_bufsize: yes
+  harden_large_queries: yes
+  harden_below_nxdomain: yes
   ## https://tools.ietf.org/html/rfc5735#section-3
-  private-address:
+  private_address:
     - 10.0.0.0/8 # private networks (RFC 1918)
     - 172.16.0.0/12
     - 192.168.0.0/16
     - 169.254.0.0/16 # link-local network (RFC 3927)
     - fd00::/8
     - fe80::/10
-  unwanted-reply-threshold: 10000000
-  do-not-query-localhost: no # allow to contact nsd on same host
-  do-not-query-address:
+  unwanted_reply_threshold: 10000000
+  do_not_query_localhost: no # allow to contact nsd on same host
+  do_not_query_address:
     # - 127.0.0.0/8 # Loopback
     # - ::1
     - 10.0.0.0/8 # private networks (RFC 1918):
     - 172.16.0.0/12
     - 192.168.0.0/16
   prefetch: yes
-  prefetch-key: yes
-  rrset-roundrobin: yes
-  minimal-responses: yes
-  auto-trust-anchor-file: "/var/lib/unbound/root.key"
-  val-log-level: 2 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
-  local-zone:
+  prefetch_key: yes
+  rrset_roundrobin: yes
+  minimal_responses: yes
+  auto_trust_anchor_file: "/usr/local/etc/unbound/root.key"
+  val_log_level: 2 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
+  local_zone:
     - belkin. static
     - corp. static
     - domain. static
@@ -130,7 +131,7 @@ pdns_rec_config:
   local-address: '127.0.0.1,::1' # local-address IP addresses to listen on, separated by spaces or commas. Also accepts ports.
   local-port: '{{dns_recursor_port}}' # port to listen on
   any-to-tcp: 'yes' # Answer ANY queries with tc=1, shunting to TCP
-  client-tcp-timeout: '2' # Timeout in seconds when talking to TCP clients
+  client-tcp-timeout: '4' # Timeout in seconds when talking to TCP clients
   daemon: 'yes' # Operate as a daemon
   dnssec: 'validate' # https://doc.powerdns.com/md/recursor/dnssec/
   disable-packetcache: 'no' # Disable packetcache
@@ -139,7 +140,7 @@ pdns_rec_config:
   export-etc-hosts: 'no' # If we should serve up contents from /etc/hosts
   forward-zones: 'dns.opennic.glue=127.0.0.1:{{nsd_port}}, geek=127.0.0.1:{{nsd_port}}, opennic.glue=127.0.0.1:{{nsd_port}}, pirate=127.0.0.1:{{nsd_port}}'
   # "dns.opennic.glue.", "bbs.", "bit.", "chan.", "dyn.", "free.", "fur.", "geek.", "gopher.", "indy.", "libre.", "neo.", "null.", "o.", "opennic.glue.", "oss.", "oz.", "parody.", "pirate."}, "opennic")
-  hint-file: '/etc/unbound/root.hints' # If set, load root hints from this file
+  hint-file: '/var/dns-recursor/root.hints' # If set, load root hints from this file
   log-common-errors: 'no' # If we should log rather common errors
   logging-facility: '0' # Facility to log messages as. 0 corresponds to local0
   loglevel: '3' # Amount of logging. Higher is more. Do not set below 3
@@ -169,7 +170,7 @@ pdns_rec_config:
   # single-socket: 'off' # If set, only use a single socket for outgoing queries
   spoof-nearmiss-max: '20' # If non-zero, assume spoofing after this many near misses
   # stats-ringbuffer-entries: '10000' # maximum number of packets to store statistics for
-  threads: '2' # Launch this number of threads
+  threads: '1' # Launch this number of threads
   trace: 'off' # if we should output heaps of logging. set to 'fail' to only log failing domains
   version-string: '' # string reported on version.pdns or version.bind
   reuseport: 'yes'
@@ -202,20 +203,25 @@ dnsdist_config: |
   --General settings
   setACL({'0.0.0.0/0', '::/0'}) --allow WWW
   controlSocket("127.0.0.1")
-  setTCPRecvTimeout(3) --client timeout
-  setTCPSendTimeout(5)
+  setTCPRecvTimeout(4) --client timeout
+  setTCPSendTimeout(4)
   setTCPUseSinglePipe(true) --v.Master
   setStaleCacheEntriesTTL(86400) --86400sec = 24h
-  setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin,leastOutstanding
+  setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin (Default leastOutstanding)
   setRingBuffersSize(250) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", order=1})
-  --[[
-  newServer({address="208.67.222.222", name="OpenDNS", order=100}) --last resort/fallback
-  newServer({address="208.67.220.220", name="OpenDNS", order=100}) --last resort/fallback
-  --]]
+
+  newServer({address="37.235.1.174", name="FreeDNS", order=100}) --last resort/fallback if unbound is down
+  newServer({address="37.235.1.177", name="FreeDNS", order=100}) --last resort/fallback if unbound is down
+  newServer({address="84.200.69.80", name="DNS.Watch", pool="abuse"}) --for abusve clients using complex queries or in-addr.arpa. Coursing delays for other users and timeouts
+  newServer({address="84.200.70.40", name="DNS.Watch", pool="abuse"})
+  newServer({address="91.239.100.100", name="UncensoredDNS", pool="abuse"}})
+  --newServer({address="208.67.220.220", name="OpenDNS", pool="abuse"})
+  --newServer({address="208.67.222.222", name="OpenDNS", pool="abuse"})
   getPool(""):setCache(pc)
+  getPool("abuse"):setCache(pc)
 
   -- Simple abuse protection
   setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
@@ -230,10 +236,10 @@ dnsdist_config: |
   local last = 0
   serial = 0
   function maintenance()
-    addDynBlocks(exceedQRate(100, 10), "Exceeded query rate", 600) --block IPs greater than 100qps over 10 sec for 10 min
+    addDynBlocks(exceedQRate(80, 10), "Exceeded query rate", 600) --block IPs greater than 80qps over 10 sec for 10 min
     addDynBlocks(exceedRespByterate(20000, 10), "Exceeded byte rate", 600) --block IPs that request more than 20 kilobytes/s over 10sec for 10 min
 
-    autoRenewCert()
+    autoRenewCert() -- DNSCrypt
   end
 
   -- Statistics
@@ -241,8 +247,11 @@ dnsdist_config: |
   carbonServer("37.252.122.50")
   -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
 
-  addAction("tracker.publicbt.com", RCodeAction(3))
-  addAction("tracker.flashtorrents.org", RCodeAction(2))
+  -- these domains have high error rate or the DNS responses time-out
+  addAction("tracker.publicbt.com", RCodeAction(3)) -- No Response http://dnsviz.net/d/tracker.publicbt.com/dnssec/ http://dnscheck.pingdom.com/?domain=publicbt.com
+  addAction("tracker.flashtorrents.org", RCodeAction(2)) -- Name Server is down http://dnscheck.pingdom.com/?domain=flashtorrents.org
+  addAction("tracker.zer0day.to", RCodeAction(2)) -- invalid DNSSEC / broken delegation http://dnscheck.pingdom.com/?domain=zer0day.to http://dnscheck.pingdom.com/?domain=tracker.zer0day.to
+  -- addAction("tracker.zer0day.to", SpoofAction("87.98.148.74"))
 
   -- DNS over TCP
   --addLocal("127.0.0.1:53", { doTCP=true, interface=lo }) -- v.master

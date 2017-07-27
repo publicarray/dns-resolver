@@ -1,0 +1,3 @@
+_unbound:
+  remote_control_dir: /usr/local/etc/unbound
+  memory_script: echo $(($(($(sysctl -n hw.pagesize) * $(sysctl -n vm.stats.vm.v_free_count) - 12582912)) / 4))

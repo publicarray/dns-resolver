@@ -57,6 +57,8 @@ addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) --Drop Qu
 addAction("example.com", RCodeAction(3)) --nxdomain for example.com
 addAction(RegexRule("[0-9]{4,}\\.cn$"), DropAction())
 
+addPoolRule("0.0.0.0", "abuse")
+
 rmRule(2)
 mvRule(from, to)
 ```

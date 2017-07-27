@@ -1,5 +1,6 @@
 _packages:
   - curl
+  - bash
   - nano
   - htop
   - git

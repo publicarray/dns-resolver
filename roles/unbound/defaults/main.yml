@@ -1,0 +1,3 @@
+unbound_server:
+  auto_trust_anchor_file: "/usr/local/etc/unbound/root.key"
+  root_hints: "/etc/unbound/root.hints"
