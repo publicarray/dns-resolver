@@ -29,7 +29,7 @@
 
 - name: Check if unbound_control.pem file exists
   stat:
-    path: "{{_unbound.remote_control_dir}}/unbound_control.pem"
+    path: "{{_unbound.conf_dir}}/unbound_control.pem"
   register: p
 
 - name: Setup unbound-control

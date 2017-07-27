@@ -73,7 +73,7 @@ unbound_server:
   directory: "/etc/unbound"
   use_syslog: yes
   log_time_ascii: yes
-  root_hints: "/etc/unbound/root.hints"
+  # root_hints: "/etc/unbound/root.hints"
   hide_identity: yes
   hide_version: yes
   harden_short_bufsize: yes
@@ -99,7 +99,7 @@ unbound_server:
   prefetch_key: yes
   rrset_roundrobin: yes
   minimal_responses: yes
-  auto_trust_anchor_file: "/usr/local/etc/unbound/root.key"
+  # auto_trust_anchor_file: "/usr/local/etc/unbound/root.key"
   val_log_level: 2 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
   local_zone:
     - belkin. static
@@ -209,15 +209,15 @@ dnsdist_config: |
   setStaleCacheEntriesTTL(86400) --86400sec = 24h
   setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin (Default leastOutstanding)
   setRingBuffersSize(250) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
+
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", order=1})
-
   newServer({address="37.235.1.174", name="FreeDNS", order=100}) --last resort/fallback if unbound is down
   newServer({address="37.235.1.177", name="FreeDNS", order=100}) --last resort/fallback if unbound is down
   newServer({address="84.200.69.80", name="DNS.Watch", pool="abuse"}) --for abusve clients using complex queries or in-addr.arpa. Coursing delays for other users and timeouts
   newServer({address="84.200.70.40", name="DNS.Watch", pool="abuse"})
-  newServer({address="91.239.100.100", name="UncensoredDNS", pool="abuse"}})
+  newServer({address="91.239.100.100", name="UncensoredDNS", pool="abuse"})
   --newServer({address="208.67.220.220", name="OpenDNS", pool="abuse"})
   --newServer({address="208.67.222.222", name="OpenDNS", pool="abuse"})
   getPool(""):setCache(pc)
