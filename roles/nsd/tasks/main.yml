@@ -10,6 +10,13 @@
   package:
     name: nsd
     state: present
+  # when: ansible_os_family != 'FreeBSD'
+
+# - name: Install nsd from port
+#   portinstall:
+#     name: nsd
+#     state: present
+#   when: ansible_os_family == 'FreeBSD'
 
 - name: Create db directory
   file:
@@ -73,13 +80,19 @@
   when: ansible_selinux
 
 - name: Configure ports for SELinux (mark udp port for dns)
-  command: semanage port -a -t dns_port_t -p udp {{nsd_port}}
-  failed_when: false # ignore failure silently
+  seport:
+    ports: "{{nsd_port}}"
+    proto: udp
+    setype: dns_port_t
+    state: present
   when: ansible_selinux
 
 - name: Configure ports for SELinux (mark tcp port for dns)
-  command: semanage port -a -t dns_port_t -p tcp {{nsd_port}}
-  failed_when: false # ignore failure silently
+  seport:
+    ports: "{{nsd_port}}"
+    proto: tcp
+    setype: dns_port_t
+    state: present
   when: ansible_selinux
 
 - name: Ensure nsd is running

@@ -8,6 +8,13 @@
   package:
     name: unbound
     state: present
+  # when: ansible_os_family != 'FreeBSD'
+
+# - name: Install unbound from port
+#   portinstall:
+#     name: unbound
+#     state: present
+#   when: ansible_os_family == 'FreeBSD'
 
 # https://github.com/jedisct1/dnscrypt-server-docker/blob/master/unbound.sh
 - name: Set cache_memory variable from shell command
@@ -72,13 +79,19 @@
   when: ansible_selinux
 
 - name: Configure ports for SELinux (mark udp port for dns)
-  command: semanage port -a -t dns_port_t -p udp {{dns_recursor_port}}
-  failed_when: false # ignore failure silently
+  seport:
+    ports: "{{dns_recursor_port}}"
+    proto: udp
+    setype: dns_port_t
+    state: present
   when: ansible_selinux
 
 - name: Configure ports for SELinux (mark tcp port for dns)
-  command: semanage port -a -t dns_port_t -p tcp {{dns_recursor_port}}
-  failed_when: false # ignore failure silently
+  seport:
+    ports: "{{dns_recursor_port}}"
+    proto: tcp
+    setype: dns_port_t
+    state: present
   when: ansible_selinux
 
 - name: Ensure unbound is running
