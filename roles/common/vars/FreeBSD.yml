@@ -5,3 +5,4 @@ _packages:
   - htop
   - git
   - bind-tools # dig command
+  - synth # port manager

@@ -8,13 +8,32 @@
   package:
     name: unbound
     state: present
-  # when: ansible_os_family != 'FreeBSD'
+#  when: ansible_os_family != 'FreeBSD'
 
 # - name: Install unbound from port
 #   portinstall:
 #     name: unbound
 #     state: present
 #   when: ansible_os_family == 'FreeBSD'
+
+## fix error when using fish shell
+# nano /usr/local/etc/rc.d/unbound
+# start_precmd()
+# {
+#         echo -n "Obtaining a trust anchor:"
+#         if [ "${unbound_anchorflags}T" = "T" ]; then
+#                 su -m -l unbound -c /usr/local/sbin/unbound-anchor
+#         else
+#                 su -m -l unbound -c "/usr/local/sbin/unbound-anchor ${unbound_anchorflags}"
+#         fi
+#         echo .
+#         /usr/local/sbin/unbound-checkconf > /dev/null
+#         return $?
+# }
+
+# build kernel with `options TCP_RFC7413`
+# nano /etc/sysctl.conf
+# net.inet.tcp.fastopen.enabled=1 (default 0)
 
 # https://github.com/jedisct1/dnscrypt-server-docker/blob/master/unbound.sh
 - name: Set cache_memory variable from shell command
@@ -64,7 +83,7 @@
 - name: Copy unbound configuration
   template:
     src: unbound.conf
-    dest: /etc/unbound/unbound.conf
+    dest: "{{_unbound.conf_dir}}/unbound.conf"
   notify: Restart unbound with cache
 
 - name: Check unbound configuration

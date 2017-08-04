@@ -6,7 +6,7 @@ Get facts-localhost: `ansible all -m setup -i "localhost," -c local`
 ## dnsdist
 
 http://www.networksorcery.com/enp/protocol/dns.htm
-http://dnsdist.org/README/
+http://dnsdist.org/
 
 ### stats/debugging
 
@@ -32,16 +32,24 @@ showRules()
 showDynBlocks()
 ```
 
+## Linux
+```
+netstat -su
+
+```
 ### actions/rules
+
+http://dnsdist.org/rules-actions.html?highlight=addaction#packet-policies
 
 ```lua
 showRules()
 
-addAction(makeRule("0.0.0.0"), TCAction())
-addAction(makeRule("0.0.0.0"), DropAction())
-addAction(makeRule("0.0.0.0"), TeeAction("8.8.8.8")) -- send queries to 8.8.8.8 and cache response
-addDomainSpoof("example.com", "127.0.0.1")
-addDomainBlock("exmple.com")
+addAction({"0.0.0.0"}, TCAction())
+addAction({"0.0.0.0"}, DropAction())
+addAction({"0.0.0.0"}, TeeAction("8.8.8.8")) -- send queries to 8.8.8.8 and cache response
+--addDomainSpoof("example.com", "127.0.0.1")
+--addDomainBlock("example.com")
+addAction("example.com", DropAction())
 
 addDelay({"0.0.0.0", "example.com"}, 200)
 addAction(makeRule("0.0.0.0"), DelayAction(200))
@@ -51,13 +59,15 @@ addNoRecurseRule("example.com")
 
 addQPSLimit(makeRule("0.0.0.0"), 5)
 addAction(MaxQPSIPRule(5), NoRecurseAction())
+addAction("com.", QPSPoolAction(10000, "gtld-cluster"))
 
 addAction(NotRule(QClassRule(1)), DropAction()) --Drop Queries that are not the internet class
 addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) --Drop Queries that are not the internet class or use the update command
 addAction("example.com", RCodeAction(3)) --nxdomain for example.com
-addAction(RegexRule("[0-9]{4,}\\.cn$"), DropAction())
+addAction(RegexRule("[0-9]{4,}\\.com$"), DropAction())
 
-addPoolRule("0.0.0.0", "abuse")
+--addPoolRule("0.0.0.0", "abuse")
+addAction({"0.0.0.0"}, PoolAction("abuse"))
 
 rmRule(2)
 mvRule(from, to)

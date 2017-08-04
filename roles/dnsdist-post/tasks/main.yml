@@ -1,5 +1,20 @@
 ---
 
+# freebsd
+- name: Install dnsdist from port
+  portinstall:
+    name: dns/dnsdist
+    state: present
+  tags: [dnsdist_post, dnsdist]
+  when: ansible_os_family == 'FreeBSD'
+
+- name: Copy dnsdist config
+  template:
+    src: dnsdist.conf
+    dest: /usr/local/etc/dnsdist.conf
+  when: ansible_os_family == 'FreeBSD'
+  tags: [dnsdist_post, dnsdist]
+
 # TODO: sysvinit and upstart
 - debug: "var=ansible_service_mgr"
 
@@ -7,6 +22,7 @@
   file:
     path: /etc/systemd/system/dnsdist.service.d/
     state: directory
+  when: ansible_os_family != 'FreeBSD'
   tags: [dnsdist_post, dnsdist]
 
 - name: Copy custom.confs service - systemd (Drops dnsdist privilege)
@@ -14,6 +30,7 @@
     src: custom.conf
     dest: /etc/systemd/system/dnsdist.service.d/custom.conf
   notify: Restart dnsdist
+  when: ansible_os_family != 'FreeBSD'
   tags: [dnsdist_post, dnsdist]
 
 - name: Copy dnscrypt.lua
@@ -23,7 +40,7 @@
   notify: Restart dnsdist
   tags: [dnsdist_post, dnsdist]
 
-- name: Check config(also creates the certs and keys)
+- name: Check config (also creates the certs and keys)
   command: dnsdist --check-config
   tags: [dnsdist_post, dnsdist]
 

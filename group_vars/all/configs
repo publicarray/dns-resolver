@@ -52,6 +52,11 @@ dns_recursor_port: '56'
 # https://www.unbound.net/documentation/unbound.conf.html
 # https://www.unbound.net/documentation/howto_optimise.html
 unbound_server:
+  # so-reuseport: yes
+  # qname-minimisation: yes
+  # use-caps-for-id: yes
+  # caps-whitelist:
+  # serve-expired: yes
   verbosity: 0 # only errors
   port: "{{dns_recursor_port}}"
   statistics_interval: 86400 # once a day print latency statistics
@@ -211,23 +216,25 @@ dnsdist_config: |
   setRingBuffersSize(250) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
 
   --Backend servers / Packet Cache
-  pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
-  newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", order=1})
-  newServer({address="37.235.1.174", name="FreeDNS", order=100}) --last resort/fallback if unbound is down
-  newServer({address="37.235.1.177", name="FreeDNS", order=100}) --last resort/fallback if unbound is down
-  newServer({address="84.200.69.80", name="DNS.Watch", pool="abuse"}) --for abusve clients using complex queries or in-addr.arpa. Coursing delays for other users and timeouts
-  newServer({address="84.200.70.40", name="DNS.Watch", pool="abuse"})
-  newServer({address="91.239.100.100", name="UncensoredDNS", pool="abuse"})
-  --newServer({address="208.67.220.220", name="OpenDNS", pool="abuse"})
-  --newServer({address="208.67.222.222", name="OpenDNS", pool="abuse"})
+  pc = newPacketCache(12000, 86400, 0, 60, 60) --cache max 12000 queries
+  newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", weight=10})
+  newServer({address="37.235.1.174", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
+  newServer({address="37.235.1.177", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
+  -- -for abusve clients using complex queries (e.g. many T.O. in in-addr.arpa). Coursing delays for other users and timeouts
+  newServer({address="84.200.69.80", name="DNS.Watch", qps=10, pool="abuse"})
+  newServer({address="84.200.70.40", name="DNS.Watch", qps=10, pool="abuse"})
+  --newServer({address="208.67.220.220", name="OpenDNS", qps=20, pool="abuse"})
+  --newServer({address="208.67.222.222", name="OpenDNS", qps=20, pool="abuse"})
   getPool(""):setCache(pc)
   getPool("abuse"):setCache(pc)
 
   -- Simple abuse protection
   setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
-  addAction(OrRule{OpcodeRule(5), NotRule(QClassRule(1))}, DropAction()) -- drop update queries and classes that are not for the internet
-  addAnyTCRule() --force ANY queries over tcp (prevent spoofed queries)
-  addAction(MaxQPSIPRule(50), TCAction()) --ask for tcp when traffic is greater than 50 qps per ip
+  -- https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml
+  addAction(NotRule(QClassRule(1)), DropAction()) -- drop classes that are not for the internet
+  addAction(OpcodeRule(5), DropAction()) -- drop update queries
+  addAction(AndRule({QTypeRule(255), TCPRule(false)}), TCAction()) --force ANY queries over tcp (prevent spoofed queries)
+  addAction(AndRule({MaxQPSIPRule(50), TCPRule(false)}), TCAction()) --ask for tcp when traffic is greater than 50 qps per ip
   --addDelay(MaxQPSIPRule(50, 32, 48), 100) --add 50ms delay to IPs with greater than 50qps (queries per second)
   --addAction(MaxQPSIPRule(50), NoRecurseAction()) --strips the Recursion Desired (RD) bit from traffic greater than 30 qps per ip
 
@@ -246,6 +253,7 @@ dnsdist_config: |
   -- webserver("127.0.0.1:8083", "mysuperpass")
   carbonServer("37.252.122.50")
   -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
+  -- https://metrics.powerdns.com/?server=dnsdist.dns.seby
 
   -- these domains have high error rate or the DNS responses time-out
   addAction("tracker.publicbt.com", RCodeAction(3)) -- No Response http://dnsviz.net/d/tracker.publicbt.com/dnssec/ http://dnscheck.pingdom.com/?domain=publicbt.com

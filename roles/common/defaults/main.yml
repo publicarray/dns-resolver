@@ -1,4 +1,5 @@
 custom_packages:
   - htop
+  - sudo
 
 installed_packages: "{{_packages}} {{custom_packages}}"

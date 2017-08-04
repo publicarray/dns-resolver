@@ -12,6 +12,15 @@
     state: present
   with_items: "{{_packages}}"
 
+# freebsd-update upgrade -r 11.0-RELEASE-p11
+#
+# - name: Update ports index [FreeBSD]
+#   command: portsnap auto; synth status
+#   when: ansible_os_family == 'FreeBSD'
+
+# synth install dns/dnsdist
+# lang/ruby23
+
 # ansible_os_family == [RedHat, Debian, Suse, Gentoo, Archlinux, Solaris, Alpine, FreeBSD, OpenBSD]
 
 # fix

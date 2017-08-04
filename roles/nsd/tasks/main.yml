@@ -10,7 +10,7 @@
   package:
     name: nsd
     state: present
-  # when: ansible_os_family != 'FreeBSD'
+#   when: ansible_os_family != 'FreeBSD'
 
 # - name: Install nsd from port
 #   portinstall:
