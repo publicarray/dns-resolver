@@ -57,6 +57,8 @@ unbound_server:
   # use-caps-for-id: yes
   # caps-whitelist:
   # serve-expired: yes
+  # ip-ratelimit: 100
+  # ip-ratelimit-size: 4m
   verbosity: 0 # only errors
   port: "{{dns_recursor_port}}"
   statistics_interval: 86400 # once a day print latency statistics
@@ -216,13 +218,13 @@ dnsdist_config: |
   setRingBuffersSize(250) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
 
   --Backend servers / Packet Cache
-  pc = newPacketCache(12000, 86400, 0, 60, 60) --cache max 12000 queries
+  pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", weight=10})
-  newServer({address="37.235.1.174", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
-  newServer({address="37.235.1.177", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
+  --newServer({address="37.235.1.174", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
+  --newServer({address="37.235.1.177", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
   -- -for abusve clients using complex queries (e.g. many T.O. in in-addr.arpa). Coursing delays for other users and timeouts
-  newServer({address="84.200.69.80", name="DNS.Watch", qps=10, pool="abuse"})
-  newServer({address="84.200.70.40", name="DNS.Watch", qps=10, pool="abuse"})
+  --newServer({address="84.200.69.80", name="DNS.Watch", qps=10, pool="abuse"})
+  --newServer({address="84.200.70.40", name="DNS.Watch", qps=10, pool="abuse"})
   --newServer({address="208.67.220.220", name="OpenDNS", qps=20, pool="abuse"})
   --newServer({address="208.67.222.222", name="OpenDNS", qps=20, pool="abuse"})
   getPool(""):setCache(pc)
