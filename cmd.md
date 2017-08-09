@@ -3,6 +3,23 @@
 Get facts: `ansible all -m setup -i hosts -u root`
 Get facts-localhost: `ansible all -m setup -i "localhost," -c local`
 
+## Sign message with keybase pgp key
+
+https://keybase.io/docs/command_line
+
+```bash
+keybase pgp sign -i message.txt --clearsign > message.txt.asc
+keybase pgp sign -i message.txt --detached # Signature only
+keybase pgp verify -i message.txt.asc
+```
+
+### keybase signature
+
+```bash
+keybase sign -i message.txt -o message.txt.sig
+keybase verify -i message.txt.sig 
+```
+
 ## dnsdist
 
 http://www.networksorcery.com/enp/protocol/dns.htm
