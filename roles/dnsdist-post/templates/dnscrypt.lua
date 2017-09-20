@@ -19,6 +19,7 @@ generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/re
 --Open ports / Listening for clients
 -- addDNSCryptBind("{{ansible_default_ipv4.address}}:54", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
 addDNSCryptBind("{{ansible_default_ipv4.address}}:443", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
+-- addDNSCryptBind("{{ansible_default_ipv6.address}}:443", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
 -- addDNSCryptBind("{{ansible_default_ipv4.address}}:1053", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
 -- addDNSCryptBind("{{ansible_default_ipv4.address}}:1194", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
 addDNSCryptBind("{{ansible_default_ipv4.address}}:5353", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
@@ -42,6 +43,7 @@ function autoRenewCert() -- called approx. every second in maintenance function
     -- getDNSCryptBind(4):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
     -- getDNSCryptBind(5):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
     -- getDNSCryptBind(6):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
+    -- getDNSCryptBind(7):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
     last = now
   end
 end

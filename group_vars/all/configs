@@ -26,7 +26,7 @@ hourly_random_sleep: 15
 daily_update_level: default
 daily_update_message: yes
 daily_download_updates: yes
-daily_apply_updates: yes
+daily_apply_updates: no
 daily_random_sleep: 180
 yum_cron_clean_what: packages # keep metadata
 yum_cron_clean_when: weekly
@@ -253,15 +253,13 @@ dnsdist_config: |
 
   -- Statistics
   -- webserver("127.0.0.1:8083", "mysuperpass")
-  carbonServer("37.252.122.50")
+  carbonServer("37.252.122.50", "dnsdist.dns.seby")
   -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
   -- https://metrics.powerdns.com/?server=dnsdist.dns.seby
 
   -- these domains have high error rate or the DNS responses time-out
   addAction("tracker.publicbt.com", RCodeAction(3)) -- No Response http://dnsviz.net/d/tracker.publicbt.com/dnssec/ http://dnscheck.pingdom.com/?domain=publicbt.com
   addAction("tracker.flashtorrents.org", RCodeAction(2)) -- Name Server is down http://dnscheck.pingdom.com/?domain=flashtorrents.org
-  addAction("tracker.zer0day.to", RCodeAction(2)) -- invalid DNSSEC / broken delegation http://dnscheck.pingdom.com/?domain=zer0day.to http://dnscheck.pingdom.com/?domain=tracker.zer0day.to
-  -- addAction("tracker.zer0day.to", SpoofAction("87.98.148.74"))
 
   -- DNS over TCP
   --addLocal("127.0.0.1:53", { doTCP=true, interface=lo }) -- v.master

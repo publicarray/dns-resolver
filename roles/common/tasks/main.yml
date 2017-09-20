@@ -31,6 +31,11 @@
 # \n", "stdout_lines": ["The included directory /etc/dnsdist/config.d/ does not exist!",
 # "Fatal error: Unable to convert parameter from no value to N5boost8optionalIbEE"]}
 
+# - name: Set Timezone
+  # command: timedatectl set-timezone Australia/Sydney # centOS
+  # dpkg-reconfigure tzdata # debian
+
+
 - name: create missing folder for dnsdist
   file:
     path: /etc/dnsdist/config.d/
