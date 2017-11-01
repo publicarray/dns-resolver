@@ -12,10 +12,10 @@ install:
   - pip install ansible
 
   # Add ansible.cfg to pick up roles path.
-  - printf '[defaults]\nroles_path = ../\n' >> ansible.cfg
+  - printf '[defaults]\nroles_path = required-roles:roles\n' >> ansible.cfg
 
   # Get dependencies from galaxy
-  - ansible-galaxy install -r requirements.yml
+  - ansible-galaxy install -r requirements.yml -p required-roles
 
 script:
   # Check the role/playbook's syntax.
