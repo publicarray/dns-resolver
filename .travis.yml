@@ -1,14 +1,31 @@
-sudo: required
-group: edge
+---
 language: python
-services:
-  - docker
+python: "2.7"
+
 before_install:
-  - docker info
-  - docker version
+  # Make sure everything's up to date.
+  - sudo apt-get update -qq
+
 install:
-  - pip install molecule
-  - pip install docker
-  # - pip install required driver (e.g. docker, python-vagrant, shade)
+  # Install Ansible.
+  - pip install ansible
+
+  # Add ansible.cfg to pick up roles path.
+  - "printf '[defaults]\nroles_path = ../' > ansible.cfg"
+
+  # Get dependencies from galaxy
+  - ansible-galaxy install -r requirements.yml
+
 script:
-  - molecule test
+  # Check the role/playbook's syntax.
+  - ansible-playbook -i tests/inventory tests/test.yml --syntax-check
+  # Run the role/playbook with ansible-playbook.
+  - ansible-playbook -i tests/inventory tests/test.yml --connection=local --sudo
+  # Run the role/playbook again, checking to make sure it's idempotent.
+  # - >
+  #   ansible-playbook -i tests/inventory tests/test.yml --connection=local --sudo
+  #   | grep -q 'changed=0.*failed=0'
+  #   && (echo 'Idempotence test: pass' && exit 0)
+  #   || (echo 'Idempotence test: fail' && exit 1)
+  # Make a DNS request to check it's working properly
+  # - "dig @ 127.0.0.1 -p 53 example.com"
