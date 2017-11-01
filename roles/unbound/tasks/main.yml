@@ -77,14 +77,20 @@
   register: threads
   check_mode: no
 
-- debug: msg="{{ threads.stdout }}"
-
+# - debug: msg="{{ threads.stdout }}"
 
 - name: Copy unbound configuration
   template:
     src: unbound.conf
     dest: "{{_unbound.conf_dir}}/unbound.conf"
   notify: Restart unbound with cache
+
+- name: Set appropreate file permissions
+  file:
+    path: "{{_unbound.conf_dir}}"
+    owner: unbound
+    group: unbound
+    recurse: yes
 
 - name: Check unbound configuration
   command: unbound-checkconf
@@ -95,7 +101,7 @@
   package:
     name: policycoreutils-python # for semanage
     state: present
-  when: ansible_selinux
+  when: ansible_selinux.status != "Missing selinux Python library"
 
 - name: Configure ports for SELinux (mark udp port for dns)
   seport:
@@ -103,7 +109,7 @@
     proto: udp
     setype: dns_port_t
     state: present
-  when: ansible_selinux
+  when: ansible_selinux.status != "Missing selinux Python library"
 
 - name: Configure ports for SELinux (mark tcp port for dns)
   seport:
@@ -111,7 +117,7 @@
     proto: tcp
     setype: dns_port_t
     state: present
-  when: ansible_selinux
+  when: ansible_selinux.status != "Missing selinux Python library"
 
 - name: Ensure unbound is running
   service:

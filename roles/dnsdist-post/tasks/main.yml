@@ -16,7 +16,7 @@
   tags: [dnsdist_post, dnsdist]
 
 # TODO: sysvinit and upstart
-- debug: "var=ansible_service_mgr"
+# - debug: "var=ansible_service_mgr"
 
 - name: Create folder for custom dnsdist service - systemd (Drops dnsdist privilege)
   file:
@@ -32,6 +32,16 @@
   notify: Restart dnsdist
   when: ansible_os_family != 'FreeBSD'
   tags: [dnsdist_post, dnsdist]
+
+- name: Temp file permission fix (allows dnsdist to read the config file)
+  file:
+    path: /etc/dnsdist/dnsdist.conf
+    owner: dnsdist
+    group: dnsdist
+    mode: 0644
+  when: ansible_os_family != 'FreeBSD'
+
+# - debug: "var=ansible_default_ipv4"
 
 - name: Copy dnscrypt.lua
   template:

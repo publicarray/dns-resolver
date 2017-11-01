@@ -23,21 +23,18 @@ docker:
       ansible_groups:
         - group1
 vagrant:
-  raw_config_args:
-    - "ssh.insert_key = false"
-    # - "ssh.shell = \"sh\"" # freebsd
-    # - "vm.base_mac = \"080027D14C66\"" # freebsd
-    - "vm.provision \"file\", source: \"~/.ssh/id_rsa.pub\", destination: \"~/.ssh/authorized_keys\""
+  # raw_config_args:
+  #   - "ssh.insert_key = false"
+  #   # - "ssh.shell = \"sh\"" # freebsd
+  #   # - "vm.base_mac = \"080027D14C66\"" # freebsd
+  #   - "vm.provision \"file\", source: \"~/.ssh/id_rsa.pub\", destination: \"~/.ssh/authorized_keys\""
   platforms:
     # - name: freeBSD
-    #   box: freebsd/FreeBSD-12.0-CURRENT # broken
-    #   box: freebsd/FreeBSD-10.3-RELEASE # broken
-    - name: ubuntu14
-      box: ubuntu/trusty64
-      # box_url: https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/14.04/providers/virtualbox.box
+    #   box: freebsd/FreeBSD-11.1-RELEASE
+    # - name: ubuntu17.10
+    #   box: ubuntu/artful64 # unbound overwrites system dns settings (stops on dns lookups during ansible playbook)
     - name: centos7
       box: centos/7
-      # box_url: https://vagrantcloud.com/centos/boxes/7/versions/1705.01/providers/virtualbox.box
   providers:
     - name: virtualbox
       type: virtualbox

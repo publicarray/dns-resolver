@@ -2,7 +2,8 @@ _packages:
   - curl
   - bash
   - nano
-  - htop
   - git
   - bind-tools # dig command
-  - synth # port manager
+  # - synth # port manager
+_ports:
+  - portmaster # port manager

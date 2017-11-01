@@ -1,18 +1,37 @@
 ---
 
+# - name: Bootstrap python install
+#   raw: pkg install -y python
+#   when: ansible_os_family == 'FreeBSD'
+
 - name: read platform variables
   include_vars:
     file: "{{ ansible_os_family }}.yml"
   tags: [always]
 
-# Install packages
+- name: Updating APT repository cache (apt-get update)
+  apt:
+    update_cache: yes
+  when: ansible_os_family == 'Debian'
+
+# - name: Upgrade all packages to the latest version
+#   package:
+#     name: "*"
+#     state: present
+
 - name: Install packages
   package:
     name: "{{item}}"
     state: present
-  with_items: "{{_packages}}"
+  with_items: "{{_packages}} + {{custom_packages|default([])}}"
 
-# freebsd-update upgrade -r 11.0-RELEASE-p11
+- name: Install ports
+  portinstall:
+    name: "{{item}}"
+    state: present
+  with_items: "{{_ports}} + {{custom_ports|default([])}}"
+  when: ansible_os_family == 'FreeBSD'
+# freebsd-update upgrade -r 11.1-RELEASE
 #
 # - name: Update ports index [FreeBSD]
 #   command: portsnap auto; synth status

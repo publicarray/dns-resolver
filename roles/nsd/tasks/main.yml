@@ -10,13 +10,19 @@
   package:
     name: nsd
     state: present
-#   when: ansible_os_family != 'FreeBSD'
+  when: ansible_os_family != 'FreeBSD'
 
-# - name: Install nsd from port
-#   portinstall:
-#     name: nsd
-#     state: present
-#   when: ansible_os_family == 'FreeBSD'
+- name: Config nsd - set ROOT_SERVER option in make.conf
+  template:
+    src: make.conf
+    dest: "/etc/make.conf"
+  when: ansible_os_family == 'FreeBSD'
+
+- name: Install nsd from port
+  portinstall:
+    name: nsd
+    state: present
+  when: ansible_os_family == 'FreeBSD'
 
 - name: Create db directory
   file:
@@ -42,6 +48,10 @@
     dest: "{{ nsd_conf }}"
     # validate: nsd-checkconf %s
   notify: Reload nsd
+
+- name: Check nsd configuration
+  command: "nsd-checkconf {{ nsd_conf }}"
+  # check_mode: no
 
 - name: Run nsd-control-setup
   command: nsd-control-setup
@@ -72,12 +82,16 @@
   notify: Restart nsd
   tags: [update-opennic-tlds]
 
+# - name: Check nsd configuration
+#   command: "nsd-checkconf {{nsd_conf_dir}}/conf.d/opennic.conf"
+#   # check_mode: no
+
 # SELinux
 - name: Configure ports for SELinux (install policycoreutils-python)
   package:
     name: policycoreutils-python # for semanage
     state: present
-  when: ansible_selinux
+  when: ansible_selinux.status != "Missing selinux Python library"
 
 - name: Configure ports for SELinux (mark udp port for dns)
   seport:
@@ -85,7 +99,7 @@
     proto: udp
     setype: dns_port_t
     state: present
-  when: ansible_selinux
+  when: ansible_selinux.status != "Missing selinux Python library"
 
 - name: Configure ports for SELinux (mark tcp port for dns)
   seport:
@@ -93,7 +107,7 @@
     proto: tcp
     setype: dns_port_t
     state: present
-  when: ansible_selinux
+  when: ansible_selinux.status != "Missing selinux Python library"
 
 - name: Ensure nsd is running
   service:

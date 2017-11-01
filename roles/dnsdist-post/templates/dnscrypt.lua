@@ -16,15 +16,25 @@ end
 --Generate init Cert (Expires in 24 hours!)
 generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0", 0, os.time() - 60 , os.time() + 86340)
 
+{%- if ansible_default_ipv4.address is defined %}
+{%- set ip = ansible_default_ipv4.address %}
+{%- else %}
+{%- set ip = '0.0.0.0' %}
+{%- endif %}
+{%- if ansible_default_ipv6.address is defined %}
+{%- set ip6 = ansible_default_ipv6.address %}
+{%- else %}
+{%- set ip6 = '::0' %}
+{%- endif %}
 --Open ports / Listening for clients
--- addDNSCryptBind("{{ansible_default_ipv4.address}}:54", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
-addDNSCryptBind("{{ansible_default_ipv4.address}}:443", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
--- addDNSCryptBind("{{ansible_default_ipv6.address}}:443", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
--- addDNSCryptBind("{{ansible_default_ipv4.address}}:1053", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
--- addDNSCryptBind("{{ansible_default_ipv4.address}}:1194", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
-addDNSCryptBind("{{ansible_default_ipv4.address}}:5353", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
-addDNSCryptBind("{{ansible_default_ipv4.address}}:8080", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
--- addDNSCryptBind("{{ansible_default_ipv4.address}}:27015", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
+-- addDNSCryptBind("{{ip}}:54", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
+addDNSCryptBind("{{ip}}:443", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
+-- addDNSCryptBind("{{ip6}}:443", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
+-- addDNSCryptBind("{{ip}}:1053", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
+-- addDNSCryptBind("{{ip}}:1194", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
+addDNSCryptBind("{{ip}}:5353", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
+addDNSCryptBind("{{ip}}:8080", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
+-- addDNSCryptBind("{{ip}}:27015", "{{dnscrypt_provider_name}}", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0")
 
 local last = os.time()
 serial = 0

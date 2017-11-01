@@ -2,6 +2,5 @@ _packages:
   - curl
   - bash
   - nano
-  - htop
   - git
   - bind-tools # dig command

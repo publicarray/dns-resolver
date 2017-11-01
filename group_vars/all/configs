@@ -18,6 +18,8 @@ unattended_remove_unused_dependencies: false
 
 # [REDHAT auto updates] https://github.com/jeffwidman/ansible-yum-cron
 # email_to: your@email.com
+emit_via: stdio
+system_name: dns.seby.io
 hourly_update_level: security
 hourly_update_message: yes
 hourly_download_updates: yes
@@ -25,17 +27,20 @@ hourly_apply_updates: yes
 hourly_random_sleep: 15
 daily_update_level: default
 daily_update_message: yes
-daily_download_updates: yes
+daily_download_updates: no
 daily_apply_updates: no
 daily_random_sleep: 180
 yum_cron_clean_what: packages # keep metadata
 yum_cron_clean_when: weekly
+hourly_base_options:
+  - "exclude=dnsdist*"
+daily_base_options: "{{ hourly_base_options }}"
 
 # [OpenNIC / nsd]
 opennic: true
 # nsd_chroot_enable: true
 # nsd_chroot_dir: /opt/nsd
-nsd_flags: "--enable-root-server"
+nsd_compile_flags: "--enable-root-server"
 nsd_ip_addresses: ["127.0.0.1"]
 nsd_reuseport: "yes"
 nsd_port: 57
@@ -67,8 +72,8 @@ unbound_server:
   jostle_timeout: 300
   outgoing_range: 8192 # (num-queries-per-thread * 2)
   outgoing_port_avoid: 5546 # fix unable to bind to port error (centOS)
-  so_rcvbuf: 4m
-  so_sndbuf: 4m
+  # so_rcvbuf: 4m
+  # so_sndbuf: 4m
   neg_cache_size: 25m
   cache_min_ttl: 600 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
   cache_max_ttl: 86400 # 14400=4h 86400=1day (default)
@@ -107,7 +112,7 @@ unbound_server:
   rrset_roundrobin: yes
   minimal_responses: yes
   # auto_trust_anchor_file: "/usr/local/etc/unbound/root.key"
-  val_log_level: 2 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
+  val_log_level: 1 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
   local_zone:
     - belkin. static
     - corp. static
@@ -193,7 +198,8 @@ dnscrypt_wrapper: false
 dnsdist: true
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_10 }}"
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_11 }}"
-dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
+dnsdist_install_repo: "{{ dnsdist_powerdns_repo_12 }}"
+# dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
 dnsdist_locals: []
 dnsdist_controlsocket: "127.0.0.1"
 # dnsdist_setkey: "" # Change this
@@ -212,17 +218,16 @@ dnsdist_config: |
   controlSocket("127.0.0.1")
   setTCPRecvTimeout(4) --client timeout
   setTCPSendTimeout(4)
-  setTCPUseSinglePipe(true) --v.Master
+  setTCPUseSinglePipe(true)
   setStaleCacheEntriesTTL(86400) --86400sec = 24h
   setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin (Default leastOutstanding)
-  setRingBuffersSize(250) --set the capacity of the ringbuffers used for live traffic inspection (default 10000) --v.Master
+  setRingBuffersSize(250) --set the capacity of the ringbuffers used for live traffic inspection (default 10000)
 
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", weight=10})
   --newServer({address="37.235.1.174", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
   --newServer({address="37.235.1.177", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
-  -- -for abusve clients using complex queries (e.g. many T.O. in in-addr.arpa). Coursing delays for other users and timeouts
   --newServer({address="84.200.69.80", name="DNS.Watch", qps=10, pool="abuse"})
   --newServer({address="84.200.70.40", name="DNS.Watch", qps=10, pool="abuse"})
   --newServer({address="208.67.220.220", name="OpenDNS", qps=20, pool="abuse"})
@@ -238,7 +243,7 @@ dnsdist_config: |
   addAction(AndRule({QTypeRule(255), TCPRule(false)}), TCAction()) --force ANY queries over tcp (prevent spoofed queries)
   addAction(AndRule({MaxQPSIPRule(50), TCPRule(false)}), TCAction()) --ask for tcp when traffic is greater than 50 qps per ip
   --addDelay(MaxQPSIPRule(50, 32, 48), 100) --add 50ms delay to IPs with greater than 50qps (queries per second)
-  --addAction(MaxQPSIPRule(50), NoRecurseAction()) --strips the Recursion Desired (RD) bit from traffic greater than 30 qps per ip
+  --addAction(MaxQPSIPRule(50), NoRecurseAction()) --strips the Recursion Desired (RD) bit from traffic greater than 50 qps per ip
 
   includeDirectory("/etc/dnsdist/config.d/")
 
@@ -253,7 +258,7 @@ dnsdist_config: |
 
   -- Statistics
   -- webserver("127.0.0.1:8083", "mysuperpass")
-  carbonServer("37.252.122.50", "dnsdist.dns.seby")
+  carbonServer("37.252.122.50", "dns.seby")
   -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
   -- https://metrics.powerdns.com/?server=dnsdist.dns.seby
 
@@ -262,8 +267,7 @@ dnsdist_config: |
   addAction("tracker.flashtorrents.org", RCodeAction(2)) -- Name Server is down http://dnscheck.pingdom.com/?domain=flashtorrents.org
 
   -- DNS over TCP
-  --addLocal("127.0.0.1:53", { doTCP=true, interface=lo }) -- v.master
-  --addLocal("127.0.0.1:53", true, false, 0) -- v.11
+  --addLocal("127.0.0.1:53", { doTCP=true, interface=lo })
 # [netdata]
 netdata: false
 

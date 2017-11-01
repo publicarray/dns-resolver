@@ -1,6 +1,6 @@
 ---
 - name: Restart dnsdist
   service:
-    daemon_reload: yes
+    # daemon_reload: yes
     name: dnsdist
     state: restarted
