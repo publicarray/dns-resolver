@@ -43,7 +43,17 @@
   register: cache_memory
   check_mode: no
 
-- debug: msg="{{ cache_memory.stdout }}"
+# - debug: msg="{{ cache_memory.stdout }}"
+
+# fix: ldns error while converting string to RR: Syntax error, could not parse the RR's TTL
+#     failed to load trust anchor from /etc/unbound/root.key at line x, skipping
+#     error reading auto-trust-anchor-file
+# in CentOS 7
+- name: Remove old bind formatted root.key for DNSSEC in RedHat systems
+  file:
+    path: "{{unbound_server.auto_trust_anchor_file}}"
+    state: absent
+  when: ansible_os_family == 'RedHat'
 
 - name: Setup or update of the root trust anchor for DNSSEC validation
   command: unbound-anchor -a "{{unbound_server.auto_trust_anchor_file}}"
