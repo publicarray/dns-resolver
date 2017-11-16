@@ -57,29 +57,35 @@ dns_recursor_port: '56'
 # https://www.unbound.net/documentation/unbound.conf.html
 # https://www.unbound.net/documentation/howto_optimise.html
 # unbound_compile: true
+unbound_compile: true
+unbound_compile_version: 1.6.7
+unbound_compile_sha256: 4e7bd43d827004c6d51bef73adf941798e4588bdb40de5e79d89034d69751c9f
+# unbound_compile_config: "--enable-dnscrypt --with-username={{unbound.server.username|default(unbound)}} --with-run-dir={{unbound.server.directory}} --with-conf-file={{unbound.server.directory}}/unbound.conf"
 unbound_optimise: true
 unbound_optimise_memory: 40
+unbound_tls_domain: dns.seby.io
+unbound_tls_cert_provider: selfsigned
 opennic_address: "{{nsd_ip_addresses|first}}@{{nsd_port}}"
 unbound:
   server:
     # so-reuseport: yes
-    # qname-minimisation: yes
+    qname-minimisation: yes
     # use-caps-for-id: yes
     # caps-whitelist:
-    # serve-expired: yes
+    serve-expired: yes
     # ip-ratelimit: 100
     # ip-ratelimit-size: 4m
-    verbosity: 0 # only errors
+    verbosity: 0
     port: "{{dns_recursor_port}}"
     statistics_interval: 86400 # once a day print latency statistics
-    interface: [127.0.0.1, '::1']
-    # interface: [127.0.0.1, '::1', 0.0.0.0@853, '::0@853']
+    # interface: [127.0.0.1, '::1']
+    interface: [127.0.0.1, '::1', 0.0.0.0@853, '::0@853']
     num_queries_per_thread: 4096
-    # ssl_service_key: "private.key"
-    # ssl_service_pem: "certificate.pem"
-    # ssl_port: 853
-    # incoming_num_tcp: 100
-    # udp_upstream_without_downstream: yes
+    ssl_service_key: "private.key"
+    ssl_service_pem: "certificate.pem"
+    ssl_port: 853
+    incoming_num_tcp: 100
+    udp_upstream_without_downstream: yes
     jostle_timeout: 300
     outgoing_range: 8192 # (num-queries-per-thread * 2)
     outgoing_port_avoid: 5546 # fix unable to bind to port error (centOS)
@@ -91,10 +97,8 @@ unbound:
     # cache_max_negative_ttl: 3600 # 1h (default)
     infra_host_ttl: 3600 # 1h, 900=15min (default)
     infra_cache_numhosts: 50000
-    # access_control: 0.0.0.0/0 allow
-    access_control: [0.0.0.0/0 deny, 127.0.0.1 allow]
-    chroot: ""
-    directory: "/etc/unbound"
+    access_control: 0.0.0.0/0 allow
+    # access_control: [0.0.0.0/0 deny, 127.0.0.1 allow]
     use_syslog: yes
     log_time_ascii: yes
     root_hints: "root.hints"
@@ -123,7 +127,6 @@ unbound:
     prefetch_key: yes
     rrset_roundrobin: yes
     minimal_responses: yes
-    # auto_trust_anchor_file: "/usr/local/etc/unbound/root.key"
     val_log_level: 1 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
     local_zone:
       - belkin. static
@@ -142,11 +145,6 @@ unbound:
   remote_control:
     control_enable: true
     control_interface: 127.0.0.1
-# unbound_tls:
-#   private_key: /etc/haproxy/dns.seby.io/privkey.pem
-#   cert: /etc/haproxy/dns.seby.io/cert.pem
-#   port: 854
-  # port: 853 # default
 
 # [pdns_recursor] https://doc.powerdns.com/md/recursor/settings/
 # pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_40 }}"
