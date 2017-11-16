@@ -59,7 +59,7 @@
   file:
     path: /etc/dnsdist/config.d/
     state: directory
-  when: dnsdist
+  when: dnsdist is defined and dnsdist
   tags: [dnsdist]
 #
 # - group:

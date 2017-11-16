@@ -1,3 +1,0 @@
-unbound_server:
-  auto_trust_anchor_file: "{{_unbound.conf_dir}}/root.key"
-  root_hints: "/etc/unbound/root.hints"

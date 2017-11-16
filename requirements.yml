@@ -17,10 +17,7 @@
   version: master
   name: PowerDNS.dnsdist
 
-- src: https://github.com/jdauphant/ansible-role-unbound
-  scm: git
-  version: master
-  name: jdauphant.unbound
+- src: publicarray.unbound
 
 - src: jnv.unattended-upgrades
   version: master
@@ -31,10 +28,6 @@
   version: master
   name: jffz.netdata
 
-- src: https://github.com/devops-coop/ansible-haproxy
-  scm: git
-  version: master
-  name: devops-coop.haproxy
 
 - src: geerlingguy.repo-epel
   version: master

@@ -56,77 +56,92 @@ dns_recursor_port: '56'
 # [unbound] https://www.unbound.net/
 # https://www.unbound.net/documentation/unbound.conf.html
 # https://www.unbound.net/documentation/howto_optimise.html
-unbound_server:
-  # so-reuseport: yes
-  # qname-minimisation: yes
-  # use-caps-for-id: yes
-  # caps-whitelist:
-  # serve-expired: yes
-  # ip-ratelimit: 100
-  # ip-ratelimit-size: 4m
-  verbosity: 0 # only errors
-  port: "{{dns_recursor_port}}"
-  statistics_interval: 86400 # once a day print latency statistics
-  interface: [127.0.0.1, '::1']
-  num_queries_per_thread: 4096
-  jostle_timeout: 300
-  outgoing_range: 8192 # (num-queries-per-thread * 2)
-  outgoing_port_avoid: 5546 # fix unable to bind to port error (centOS)
-  # so_rcvbuf: 4m
-  # so_sndbuf: 4m
-  neg_cache_size: 25m
-  cache_min_ttl: 600 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
-  cache_max_ttl: 86400 # 14400=4h 86400=1day (default)
-  # cache_max_negative_ttl: 3600 # 1h (default)
-  infra_host_ttl: 3600 # 1h, 900=15min (default)
-  infra_cache_numhosts: 50000
-  access_control: [0.0.0.0/0 deny, 127.0.0.1 allow]
-  chroot: ""
-  directory: "/etc/unbound"
-  use_syslog: yes
-  log_time_ascii: yes
-  # root_hints: "/etc/unbound/root.hints"
-  hide_identity: yes
-  hide_version: yes
-  harden_short_bufsize: yes
-  harden_large_queries: yes
-  harden_below_nxdomain: yes
-  ## https://tools.ietf.org/html/rfc5735#section-3
-  private_address:
-    - 10.0.0.0/8 # private networks (RFC 1918)
-    - 172.16.0.0/12
-    - 192.168.0.0/16
-    - 169.254.0.0/16 # link-local network (RFC 3927)
-    - fd00::/8
-    - fe80::/10
-  unwanted_reply_threshold: 10000000
-  do_not_query_localhost: no # allow to contact nsd on same host
-  do_not_query_address:
-    # - 127.0.0.0/8 # Loopback
-    # - ::1
-    - 10.0.0.0/8 # private networks (RFC 1918):
-    - 172.16.0.0/12
-    - 192.168.0.0/16
-  prefetch: yes
-  prefetch_key: yes
-  rrset_roundrobin: yes
-  minimal_responses: yes
-  # auto_trust_anchor_file: "/usr/local/etc/unbound/root.key"
-  val_log_level: 1 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
-  local_zone:
-    - belkin. static
-    - corp. static
-    - domain. static
-    - example. static
-    - home. static
-    - invalid. static
-    - lan. static
-    - local. static
-    - localdomain. static
-    - internal. static
-    - virtualmin. static
-    - test. static
-    - "2.dnscrypt-cert.{{ ansible_hostname }} refuse"
+# unbound_compile: true
+unbound_optimise: true
+unbound_optimise_memory: 40
+opennic_address: "{{nsd_ip_addresses|first}}@{{nsd_port}}"
+unbound:
+  server:
+    # so-reuseport: yes
+    # qname-minimisation: yes
+    # use-caps-for-id: yes
+    # caps-whitelist:
+    # serve-expired: yes
+    # ip-ratelimit: 100
+    # ip-ratelimit-size: 4m
+    verbosity: 0 # only errors
+    port: "{{dns_recursor_port}}"
+    statistics_interval: 86400 # once a day print latency statistics
+    interface: [127.0.0.1, '::1']
+    # interface: [127.0.0.1, '::1', 0.0.0.0@853, '::0@853']
+    num_queries_per_thread: 4096
+    # ssl_service_key: "private.key"
+    # ssl_service_pem: "certificate.pem"
+    # ssl_port: 853
+    # incoming_num_tcp: 100
+    # udp_upstream_without_downstream: yes
+    jostle_timeout: 300
+    outgoing_range: 8192 # (num-queries-per-thread * 2)
+    outgoing_port_avoid: 5546 # fix unable to bind to port error (centOS)
+    # so_rcvbuf: 4m
+    # so_sndbuf: 4m
+    neg_cache_size: 25m
+    cache_min_ttl: 600 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
+    cache_max_ttl: 86400 # 14400=4h 86400=1day (default)
+    # cache_max_negative_ttl: 3600 # 1h (default)
+    infra_host_ttl: 3600 # 1h, 900=15min (default)
+    infra_cache_numhosts: 50000
+    # access_control: 0.0.0.0/0 allow
+    access_control: [0.0.0.0/0 deny, 127.0.0.1 allow]
+    chroot: ""
+    directory: "/etc/unbound"
+    use_syslog: yes
+    log_time_ascii: yes
+    root_hints: "root.hints"
+    hide_identity: yes
+    hide_version: yes
+    harden_short_bufsize: yes
+    harden_large_queries: yes
+    harden_below_nxdomain: yes
+    ## https://tools.ietf.org/html/rfc5735#section-3
+    private_address:
+      - 10.0.0.0/8 # private networks (RFC 1918)
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+      - 169.254.0.0/16 # link-local network (RFC 3927)
+      - fd00::/8
+      - fe80::/10
+    unwanted_reply_threshold: 10000000
+    do_not_query_localhost: no # allow to contact nsd on same host
+    do_not_query_address:
+      # - 127.0.0.0/8 # Loopback
+      # - ::1
+      - 10.0.0.0/8 # private networks (RFC 1918):
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+    prefetch: yes
+    prefetch_key: yes
+    rrset_roundrobin: yes
+    minimal_responses: yes
+    # auto_trust_anchor_file: "/usr/local/etc/unbound/root.key"
+    val_log_level: 1 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
+    local_zone:
+      - belkin. static
+      - corp. static
+      - domain. static
+      - example. static
+      - home. static
+      - invalid. static
+      - lan. static
+      - local. static
+      - localdomain. static
+      - internal. static
+      - virtualmin. static
+      - test. static
+      - "2.dnscrypt-cert.{{ ansible_hostname }} refuse"
+  remote_control:
+    control_enable: true
+    control_interface: 127.0.0.1
 # unbound_tls:
 #   private_key: /etc/haproxy/dns.seby.io/privkey.pem
 #   cert: /etc/haproxy/dns.seby.io/cert.pem
@@ -273,55 +288,3 @@ netdata: false
 
 # /etc/netdata/netdata.conf
 # /etc/netdata/health_alarm_notify.conf
-
-# [DNS over TCP]
-dns_over_tcp: true
-dns_over_tcp_bind_ip: 0.0.0.0
-dns_over_tcp_port: 853
-dns_over_tcp_cert:
-  - domains: [ "{{ansible_nodename}}", "www.{{ansible_nodename}}" ]
-  - provider: 'cloudflare'
-  - email: ''
-  - apikey: ''
-
-# [haproxy]
-haproxy_global:
-# netdata
-# stats socket /var/run/haproxy.sock mode 660 level operator group netdata
-# stats timeout 2m #Wait up to 2 minutes for input
-
-  log:
-    - address: 127.0.0.1
-      facility: user
-      level: warning
-  ssl-default-bind-options: force-tlsv12
-  ssl-default-bind-ciphers: ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
-  tune:
-    ssl:
-      default-dh-param: 2048
-
-haproxy_defaults:
-  mode: tcp
-    # log global
-    # mode tcp
-    # balance roundrobin
-    # timeout http-request 10s
-    # timeout queue 1m
-    # timeout connect 10s
-    # timeout client 1m
-    # timeout server 1m
-    # timeout http-keep-alive 1m
-    # timeout check 1m
-
-haproxy_listen:
-  - name: dns-over-tcp
-    bind: 0.0.0.0:853
-    log: global
-    # option: tcplog
-    ssl:
-      cert: /etc/haproxy/dns.seby.io/certkey.pem
-    servers:
-      - name: dns-server
-        ip: 127.0.0.1
-        port: 53
-        maxconn: 5000

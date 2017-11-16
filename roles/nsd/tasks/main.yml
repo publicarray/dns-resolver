@@ -62,12 +62,20 @@
 - name: Get OpenNIC tlds
   # dig @45.56.115.189 TXT tlds.opennic.glue +short | grep -v '^;' | sed s/\"//g | tr " " "\n"
   shell: "dig @45.56.115.189 TXT tlds.opennic.glue +short | grep -v '^;' | sed s/\\\"//g | tr \" \" \"\\n\""
-  register: tlds
+  register: opennic_tlds_temp
   check_mode: false
+  when: opennic is defined and opennic
   tags: [update-opennic-tlds, unbound]
 
 - debug:
-    msg: "{{tlds.stdout_lines}}"
+    msg: "{{opennic_tlds_temp.stdout_lines}}"
+  when: opennic is defined and opennic
+  tags: [update-opennic-tlds]
+
+- name: Set OpenNIC tlds
+  set_fact:
+    opennic_tlds: "{{opennic_tlds_temp.stdout_lines}}"
+  when: opennic is defined and opennic
   tags: [update-opennic-tlds]
 
 - name: Create nsd/conf.d directory
@@ -80,6 +88,7 @@
     src: opennic.conf
     dest: "{{nsd_conf_dir}}/conf.d/opennic.conf"
   notify: Restart nsd
+  when: opennic is defined and opennic
   tags: [update-opennic-tlds]
 
 # - name: Check nsd configuration
