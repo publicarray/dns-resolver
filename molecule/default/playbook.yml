@@ -1,17 +1,18 @@
 ---
-- hosts: localhost
-  remote_user: root
+- name: Converge
+  hosts: all
+  become: true
   roles:
+    # - role: .
     - { role: geerlingguy.repo-epel, when: ansible_os_family == 'RedHat', tags: [init] }
     - { role: common, tags: [init] }
     - { role: jnv.unattended-upgrades, when: ansible_os_family == 'Debian', tags: [init] }
     - { role: jeffwidman.yum-cron, when: ansible_os_family == 'RedHat', tags: [init] }
     - { role: nsd, when: opennic == true, tags: [nsd, opennic] }
-    - { role: unbound, when: dns_recursor == 'unbound', tags: [unbound] }
-    - { role: root-hints, when: dns_recursor == 'pdns_recursor', tags: [pdns_recursor] }
-    - { role: PowerDNS.pdns_recursor, when: dns_recursor == 'pdns_recursor', tags: [pdns_recursor] }
+    - { role: publicarray.unbound, when: dns_recursor == 'unbound', tags: [unbound] }
+    # - { role: root-hints, when: dns_recursor == 'pdns_recursor', tags: [pdns_recursor] }
+    # - { role: PowerDNS.pdns_recursor, when: dns_recursor == 'pdns_recursor', tags: [pdns_recursor] }
     - { role: PowerDNS.dnsdist, when: dnsdist == true and ansible_os_family != 'FreeBSD', tags: [dnsdist] }
     - { role: dnsdist-post, when: dnsdist == true, tags: [dnsdist]}
     - { role: dnscrypt-wrapper, when: dnscrypt_wrapper == true, tags: [dnscrypt_wrapper] }
-    - { role: netdata, when: netdata == true, tags: [netdata] }
-    # - { role: devops-coop.haproxy, tags: [haproxy] }
+    # - { role: netdata, when: netdata == true, tags: [netdata] }

@@ -9,6 +9,15 @@
     file: "{{ ansible_os_family }}.yml"
   tags: [always]
 
+- name: whoami
+  command: whoami
+  register: whoami
+  when_changed: false
+
+- name: display whoami output
+  debug:
+    msg: "whoami: {{whoami.stdout}}"
+
 - name: Updating APT repository cache (apt-get update)
   apt:
     update_cache: yes

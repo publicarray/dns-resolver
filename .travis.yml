@@ -3,30 +3,36 @@ language: python
 python: "2.7"
 cache: pip
 
+env:
+  - ANSIBLE_ROLES_PATH=roles:required-roles
+
 before_install:
   # Make sure everything's up to date.
   - sudo apt-get update -qq
 
 install:
   # Install Ansible.
-  - pip install ansible
+  - pip install ansible ansible-lint yamllint
 
   # Add ansible.cfg to pick up roles path.
-  - printf '[defaults]\nroles_path = required-roles:roles\n' >> ansible.cfg
+  # - printf '[defaults]\nroles_path = required-roles:roles\n' >> ansible.cfg
 
   # Get dependencies from galaxy
   - ansible-galaxy install -r requirements.yml -p required-roles
 
 script:
   # Check the role/playbook's syntax.
-  - ansible-playbook -i tests/inventory tests/test.yml --syntax-check
+  - ansible-playbook -i 127.0.0.1, playbook.yml --syntax-check
   # Run the role/playbook with ansible-playbook.
-  - ansible-playbook -i tests/inventory tests/test.yml --connection=local --sudo
+  - ansible-playbook -i 127.0.0.1, playbook.yml --connection=local --sudo
   # Run the role/playbook again, checking to make sure it's idempotent.
   # - >
-  #   ansible-playbook -i tests/inventory tests/test.yml --connection=local --sudo
+  #   ansible-playbook -i localhost, playbook.yml --connection=local --sudo
   #   | grep -q 'changed=0.*failed=0'
   #   && (echo 'Idempotence test: pass' && exit 0)
   #   || (echo 'Idempotence test: fail' && exit 1)
   # Make a DNS request to check it's working properly
-  # - "dig @ 127.0.0.1 -p 53 example.com"
+  # - "dig @127.0.0.1 -p 53"
+  # linting
+  - yamllint **/*.yml *.yml
+  # - ansible-lint playbook.yml

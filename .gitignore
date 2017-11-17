@@ -2,6 +2,7 @@ group_vars/all/secrets
 *.retry
 temp
 hosts
+venv
 required-roles
 .molecule
 .vagrant

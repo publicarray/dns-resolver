@@ -1,0 +1,52 @@
+---
+dependency:
+  enabled: false
+  name: galaxy
+
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+
+lint:
+  name: yamllint
+
+platforms:
+  - name: centos7
+    box: centos/7
+  # - name: ubuntu-xenial
+  #   box: bento/ubuntu-16.04
+  # - name: debian-jessie
+  #   box: debian/jessie64
+  # - name: freeBSD
+  #   box: freebsd/FreeBSD-11.1-RELEASE
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: ../../roles:../../required-roles
+  playbooks:
+    converge: ../../playbook.yml
+  options:
+    diff: true
+    # vvv: true
+  config_options:
+    defaults:
+      hash_behaviour: merge
+  lint:
+    name: ansible-lint
+
+scenario:
+  name: default
+  test_sequence:
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    # - idempotence
+    - lint
+    - side_effect
+    - verify
+    - destroy

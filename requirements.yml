@@ -17,9 +17,13 @@
   version: master
   name: PowerDNS.dnsdist
 
-- src: publicarray.unbound
+- src: https://github.com/publicarray/ansible-role-unbound
+  scm: git
+  version: master
+  name: publicarray.unbound
 
-- src: jnv.unattended-upgrades
+- src: https://github.com/jnv/ansible-role-unattended-upgrades
+  scm: git
   version: master
   name: jnv.unattended-upgrades
 
@@ -28,7 +32,7 @@
   version: master
   name: jffz.netdata
 
-
-- src: geerlingguy.repo-epel
+- src: https://github.com/geerlingguy/ansible-role-repo-epel
+  scm: git
   version: master
   name: geerlingguy.repo-epel
