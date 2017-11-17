@@ -39,32 +39,34 @@ $ dnsdist --client
 
 # Test
 
-## with [molecule](https://molecule.readthedocs.io/)
+## Test with [molecule](https://molecule.readthedocs.io/)
 
-### [first time setup](https://molecule.readthedocs.io/en/master/usage.html)
+### first time setup
 
-```sh
-pip install molecule # or brew install molecule
-# molecule init --driver <yourdriver>
-# brew install docker # or brew cask install vagrant virtualbox
+```bash
+brew cask install vagrant virtualbox
+virtualenv --no-setuptools venv
+source venv/bin/activate or source venv/bin/activate.fish
+pip install python-vagrant molecule
 ```
 
-```sh
+#### Run test
+
+```bash
 molecule test
 ```
 
 ## Linting & Formatting
 
-```
+```bash
 pip install yamllint 
 pip install ansible-lint # may overwrite /usr/local/bin/ansible
-yamllint **/*.yml *.yml
-ansible-lint playbook.yml 
+gem install travis --no-rdoc --no-ri
+
+ansible-playbook playbook.yml -i hosts --syntax-check
+travis lint .travis.yml
+yamllint -- **/*.yml *.yml # or yamllint $(find . -name '*.yml')
+ansible-lint --exclude=required-roles --exclude="$HOME/.ansible/roles" playbook.yml
 ```
 
-<!-- ## with docker
-
-```sh
-docker build -f docker/Dockerfile-ubuntu16.04 -t dns-ubuntu16.04 .
-```
- -->
+Or just run the lint script: `./lint`

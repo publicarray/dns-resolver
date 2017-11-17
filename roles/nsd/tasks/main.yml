@@ -52,7 +52,9 @@
 
 - name: Check nsd configuration
   command: "nsd-checkconf {{ nsd_conf }}"
-  # check_mode: no
+  changed_when: false
+  check_mode: false
+  ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Run nsd-control-setup
   command: nsd-control-setup
@@ -99,7 +101,7 @@
 # SELinux
 - name: Configure ports for SELinux (install policycoreutils-python)
   package:
-    name: policycoreutils-python # for semanage
+    name: policycoreutils-python  # for semanage
     state: present
   when: ansible_selinux.status != "Missing selinux Python library"
 

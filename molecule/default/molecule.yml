@@ -12,14 +12,16 @@ lint:
   name: yamllint
 
 platforms:
-  - name: centos7
-    box: centos/7
-  # - name: ubuntu-xenial
-  #   box: bento/ubuntu-16.04
-  # - name: debian-jessie
-  #   box: debian/jessie64
-  # - name: freeBSD
-  #   box: freebsd/FreeBSD-11.1-RELEASE
+  - name: ubuntu14.04
+    box: ubuntu/trusty64
+#   - name: centos7
+#     box: centos/7
+#   - name: ubuntu-xenial
+#     box: bento/ubuntu-16.04
+#   - name: debian-jessie
+#     box: debian/jessie64
+#   - name: freeBSD
+#     box: freebsd/FreeBSD-11.1-RELEASE
 
 provisioner:
   name: ansible

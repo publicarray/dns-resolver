@@ -1,3 +1,4 @@
+---
 nsd_user: "{{ __nsd_user }}"
 nsd_group: "{{ __nsd_group }}"
 nsd_db_dir: "{{ __nsd_db_dir }}"
@@ -18,7 +19,7 @@ nsd_chroot_enable: false
 nsd_chroot_dir: "{{ nsd_conf_dir }}"
 nsd_hide_version: "no"
 nsd_minimal_responses: "no"
-nsd_statistics: 0 # or 3600
+nsd_statistics: 0  # or 3600
 nsd_round_robin: "no"
 
 nsd_remote_control: "no"

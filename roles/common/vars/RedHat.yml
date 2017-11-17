@@ -1,9 +1,10 @@
+---
 _packages:
   - curl
   - nano
   - git
-  - yum-utils # needs-restarting
-  - bind-utils # dig
-  - deltarpm # smaller downloads but more processing time
-  - net-tools # netstat
-  - iproute # ip
+  - yum-utils  # needs-restarting
+  - bind-utils  # dig
+  - deltarpm  # smaller downloads but more processing time
+  - net-tools  # netstat
+  - iproute  # ip

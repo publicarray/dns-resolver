@@ -1,3 +1,4 @@
+---
 dnscrypt_packages:
   - git
   - autoconf

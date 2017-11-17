@@ -16,6 +16,9 @@ insert_final_newline = true
 [*.yml]
 indent_size = 2
 
+[lint]
+indent_size = 4
+
 [*.conf]
 indent_size = 4
 

@@ -50,9 +50,12 @@
   notify: Restart dnsdist
   tags: [dnsdist_post, dnsdist]
 
-- name: Check config (also creates the certs and keys)
+- name: Check config (hopefully creates the certs and keys?)
   command: dnsdist --check-config
   tags: [dnsdist_post, dnsdist]
+  changed_when: false
+  check_mode: false
+  ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Ensure dnsdist is running
   service:

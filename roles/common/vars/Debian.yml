@@ -1,6 +1,7 @@
+---
 _packages:
   - curl
   - nano
   - git
   - apt-utils
-  - dnsutils # dig command
+  - dnsutils  # dig command

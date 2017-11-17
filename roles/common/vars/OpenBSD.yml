@@ -1,6 +1,7 @@
+---
 _packages:
   - curl
   - bash
   - nano
   - git
-  - bind-tools # dig command
+  - bind-tools  # dig command

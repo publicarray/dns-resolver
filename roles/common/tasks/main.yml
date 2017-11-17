@@ -12,7 +12,8 @@
 - name: whoami
   command: whoami
   register: whoami
-  when_changed: false
+  changed_when: false
+  check_mode: false
 
 - name: display whoami output
   debug:
@@ -60,8 +61,8 @@
 # "Fatal error: Unable to convert parameter from no value to N5boost8optionalIbEE"]}
 
 # - name: Set Timezone
-  # command: timedatectl set-timezone Australia/Sydney # centOS
-  # dpkg-reconfigure tzdata # debian
+#   command: timedatectl set-timezone Australia/Sydney # centOS
+#   dpkg-reconfigure tzdata # debian
 
 
 - name: create missing folder for dnsdist

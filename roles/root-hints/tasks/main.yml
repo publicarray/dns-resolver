@@ -1,3 +1,4 @@
+---
 - name: Create /var/dns-recursor folder
   file:
     path: /var/dns-recursor
