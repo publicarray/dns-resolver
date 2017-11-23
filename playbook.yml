@@ -3,7 +3,7 @@
   hosts: all
   become: true
   # strategy: debug
-  # remote_user: root
+  remote_user: root
   roles:
     - { role: geerlingguy.repo-epel, when: ansible_os_family == 'RedHat', tags: [init] }
     - { role: common, tags: [init] }

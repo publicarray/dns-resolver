@@ -48,6 +48,7 @@ brew cask install vagrant virtualbox
 virtualenv --no-setuptools venv
 source venv/bin/activate or source venv/bin/activate.fish
 pip install python-vagrant molecule
+ansible-galaxy install -r requirements.yml -p required-roles # --force
 ```
 
 #### Run test
