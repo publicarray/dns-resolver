@@ -68,18 +68,18 @@
   register: opennic_tlds_temp
   check_mode: false
   when: opennic is defined and opennic
-  tags: [update-opennic-tlds, unbound]
+  tags: [update-opennic-tlds, unbound, unbound-config]
 
 - debug:
     msg: "{{opennic_tlds_temp.stdout_lines}}"
   when: opennic is defined and opennic
-  tags: [update-opennic-tlds]
+  tags: [update-opennic-tlds, unbound, unbound-config]
 
 - name: Set OpenNIC tlds
   set_fact:
     opennic_tlds: "{{opennic_tlds_temp.stdout_lines}}"
   when: opennic is defined and opennic
-  tags: [update-opennic-tlds]
+  tags: [update-opennic-tlds, unbound, unbound-config]
 
 - name: Create nsd/conf.d directory
   file:
