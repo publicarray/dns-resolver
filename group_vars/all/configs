@@ -48,9 +48,9 @@ nsd_hide_version: "yes"
 nsd_round_robin: "yes"
 nsd_remote_control: "yes"
 nsd_minimal_responses: "no"
+nsd_do_ip6: "yes"
 
 # [DNS]
-dns_recursor: 'unbound' # [pdns_recursor|unbound]
 dns_recursor_port: '56'
 
 # [unbound] https://www.unbound.net/
@@ -182,60 +182,6 @@ unbound:
     control_enable: true
     control_interface: 127.0.0.1
 
-# [pdns_recursor] https://doc.powerdns.com/md/recursor/settings/
-# pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_40 }}"
-pdns_rec_install_repo: "{{ pdns_rec_powerdns_repo_master }}"
-pdns_rec_config:
-  allow-from: # If set, only allow these comma separated netmasks to recurse
-    - '0.0.0.0/0'
-    - '::/0'
-  local-address: '127.0.0.1,::1' # local-address IP addresses to listen on, separated by spaces or commas. Also accepts ports.
-  local-port: '{{dns_recursor_port}}' # port to listen on
-  any-to-tcp: 'yes' # Answer ANY queries with tc=1, shunting to TCP
-  client-tcp-timeout: '4' # Timeout in seconds when talking to TCP clients
-  daemon: 'yes' # Operate as a daemon
-  dnssec: 'validate' # https://doc.powerdns.com/md/recursor/dnssec/
-  disable-packetcache: 'no' # Disable packetcache
-  entropy-source: '/dev/urandom'
-  etc-hosts-file: '/dev/null'
-  export-etc-hosts: 'no' # If we should serve up contents from /etc/hosts
-  forward-zones: 'dns.opennic.glue=127.0.0.1:{{nsd_port}}, geek=127.0.0.1:{{nsd_port}}, opennic.glue=127.0.0.1:{{nsd_port}}, pirate=127.0.0.1:{{nsd_port}}'
-  # "dns.opennic.glue.", "bbs.", "bit.", "chan.", "dyn.", "free.", "fur.", "geek.", "gopher.", "indy.", "libre.", "neo.", "null.", "o.", "opennic.glue.", "oss.", "oz.", "parody.", "pirate."}, "opennic")
-  hint-file: '/var/dns-recursor/root.hints' # If set, load root hints from this file
-  log-common-errors: 'no' # If we should log rather common errors
-  logging-facility: '0' # Facility to log messages as. 0 corresponds to local0
-  loglevel: '3' # Amount of logging. Higher is more. Do not set below 3
-  lowercase-outgoing: 'no' # Force outgoing questions to lowercase
-  max-cache-entries: '1000000' # If set, maximum number of entries in the main cache
-  max-cache-ttl: '86400' # (1 day) maximum number of seconds to keep a cached entry in memory
-  max-mthreads: '2048' #  Maximum number of simultaneous Mtasker threads
-  max-negative-ttl: '3600' # (1 hour) maximum number of seconds to keep a negative cached entry in memory
-  max-packetcache-entries: '500000' # maximum number of entries to keep in the packetcache
-  max-qperq: '50' #  Maximum outgoing queries per query
-  max-tcp-clients: '1024' # Maximum number of simultaneous TCP clients
-  max-tcp-per-client: '128' # If set, maximum number of TCP sessions per client (IP address)
-  max-total-msec: '15000' # (15 sec) Maximum total wall-clock time per query in milliseconds, 0 for unlimited <https://www.nlnetlabs.nl/downloads/publications/os3-2015-rp2-hamza-boulakhrif.pdf?
-  minimum-ttl-override: '300' # (5 min) Set under adverse conditions, a minimum TTL
-  network-timeout: '1500' # (1.5 sec) Wait this number of milliseconds for network i/o
-  no-shuffle: 'no'
-  packetcache-servfail-ttl: '60' # maximum number of seconds to keep a cached servfail entry in packetcache
-  packetcache-ttl: '3600' # maximum number of seconds to keep a cached entry in packetcache
-  query-local-address: '0.0.0.0' # Source IP address for sending queries
-  query-local-address6: '::' # Source IPv6 address for sending queries. IF UNSET, IPv6 WILL NOT BE USED FOR OUTGOING QUERIES
-  quiet: 'yes' # Suppress logging of questions and answers
-  # security-poll-suffix: '' # Domain name from which to query security update notifications
-  serve-rfc1918: 'yes' # If we should be authoritative for RFC 1918 private IP space
-  server-down-max-fails: '64' # Maximum number of consecutive timeouts (and unreachables) to mark a server as down ( 0 => disabled )
-  server-down-throttle-time: '60' #  Number of seconds to throttle all queries to a server after being marked as down
-  # server-id: '' # Returned when queried for 'server.id' TXT or NSID, defaults to hostname
-  # single-socket: 'off' # If set, only use a single socket for outgoing queries
-  spoof-nearmiss-max: '20' # If non-zero, assume spoofing after this many near misses
-  # stats-ringbuffer-entries: '10000' # maximum number of packets to store statistics for
-  threads: '1' # Launch this number of threads
-  trace: 'off' # if we should output heaps of logging. set to 'fail' to only log failing domains
-  version-string: '' # string reported on version.pdns or version.bind
-  reuseport: 'yes'
-
 # [Generic DNScrypt]
 dnscrypt_provider_name: '2.dnscrypt-cert.dns.seby.io'
 
@@ -274,7 +220,7 @@ dnsdist_config: |
 
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
-  newServer({address="127.0.0.1:{{dns_recursor_port}}", name="{{dns_recursor}}", weight=10})
+  newServer({address="127.0.0.1:{{dns_recursor_port}}", name="unbound", weight=10})
   --newServer({address="37.235.1.174", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
   --newServer({address="37.235.1.177", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
   --newServer({address="84.200.69.80", name="DNS.Watch", qps=10, pool="abuse"})
