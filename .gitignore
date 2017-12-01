@@ -6,3 +6,4 @@ venv
 required-roles
 .molecule
 .vagrant
+ansible_fact_cache
