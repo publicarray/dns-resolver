@@ -71,7 +71,7 @@ unbound:
     verbosity: 0 # no verbosity, only errors
     use_syslog: yes
     log_time_ascii: yes
-    val_log_level: 1 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
+    val_log_level: 0 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
     # statistics_interval: 86400 # once a day print latency statistics
     pidfile: unbound.pid
     statistics_interval: 0 # for munin graphs
@@ -86,7 +86,7 @@ unbound:
     ssl_port: 853
     root_hints: "root.hints"
     udp_upstream_without_downstream: yes
-    access_control: 0.0.0.0/0 allow
+    access_control: [0.0.0.0/0 allow, '::/0 allow']
     # access_control: [0.0.0.0/0 deny, 127.0.0.1 allow]
     ## Privacy
     qname_minimisation: yes
@@ -134,7 +134,7 @@ unbound:
     num_queries_per_thread: 2048
     outgoing_range: 4096 # (num-queries-per-thread * 2)
     outgoing_port_avoid: 5546 # fix unable to bind to port error (centOS)
-    incoming_num_tcp: 100
+    incoming_num_tcp: 200
     # Sydney, AU to New York, USA (http://nj-us-ping.vultr.com/) avg ping 224ms
     # Sydney, AU to Paris, FR (http://par-fr-ping.vultr.com) avg ping 309ms
     # Sydney, AU to Amsterdam, NL (http://ams-nl-ping.vultr.com) avg ping 318ms
@@ -220,14 +220,16 @@ dnsdist_config: |
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:{{unbound.server.port}}", name="unbound", weight=10})
-  --newServer({address="37.235.1.174", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
-  --newServer({address="37.235.1.177", name="FreeDNS", qps=5, order=100}) --last resort/fallback if unbound is down
-  --newServer({address="84.200.69.80", name="DNS.Watch", qps=10, pool="abuse"})
-  --newServer({address="84.200.70.40", name="DNS.Watch", qps=10, pool="abuse"})
-  --newServer({address="208.67.220.220", name="OpenDNS", qps=20, pool="abuse"})
-  --newServer({address="208.67.222.222", name="OpenDNS", qps=20, pool="abuse"})
+  --newServer({address="9.9.9.9",  name="Quad9", qps=50, order=100}) --last resort/fallback if unbound is down https://www.quad9.net (blocklist)
+  --newServer({address="9.9.9.10", name="Quad9", qps=50, order=100}) --last resort/fallback if unbound is down https://www.quad9.net
+  --newServer({address="37.235.1.174", name="FreeDNS", qps=10, order=100}) --last resort/fallback if unbound is down
+  --newServer({address="37.235.1.177", name="FreeDNS", qps=10, order=100}) --last resort/fallback if unbound is down
+  --newServer({address="84.200.69.80", name="DNS.Watch", qps=20, pool="abuse"})
+  --newServer({address="84.200.70.40", name="DNS.Watch", qps=20, pool="abuse"})
+  --newServer({address="208.67.220.220", name="OpenDNS", qps=50, pool="abuse"})
+  --newServer({address="208.67.222.222", name="OpenDNS", qps=50, pool="abuse"})
   getPool(""):setCache(pc)
-  getPool("abuse"):setCache(pc)
+  -- getPool("abuse"):setCache(pc)
 
   -- Simple abuse protection
   setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
