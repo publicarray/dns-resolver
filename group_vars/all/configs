@@ -49,6 +49,7 @@ nsd_round_robin: "yes"
 nsd_remote_control: "yes"
 nsd_minimal_responses: "no"
 nsd_do_ip6: "yes"
+xfrd_reload_timeout: 5
 
 # [unbound] https://www.unbound.net/
 # https://www.unbound.net/documentation/unbound.conf.html

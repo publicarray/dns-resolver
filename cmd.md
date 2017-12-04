@@ -44,6 +44,7 @@ grepq("0.0.0.0", 25)
 grepq("2000ms", 25)
 grepq("", 10) -- last 10 queries
 showBinds()
+showDNSCryptBinds()
 showTCPStats()
 showRules()
 showDynBlocks()
@@ -149,9 +150,9 @@ sudo nano /etc/stubby.conf
 , dns_transport_list: [ GETDNS_TRANSPORT_TLS ]
 , tls_authentication: GETDNS_AUTHENTICATION_REQUIRED
 , tls_connection_retries: 9999999999
-, tls_query_padding_blocksize: 256
+, tls_query_padding_blocksize: 0
 , edns_client_subnet_private : 1
-, idle_timeout: 10000
+, idle_timeout: 30000
 , listen_addresses: 
   [ { address_data: 127.0.0.1
     , address_type: "IPv4"
@@ -215,50 +216,6 @@ launchctl load -w ~/Library/LaunchAgents/stubby.plist
 
 https://dnsprivacy.org/wiki/display/DP/Running+a+DNS+Privacy+server
 
-### haproxy
-
-```sh
-yum -y install haproxy
-```
-
-semanage port -a -t commplex_main_port_t -p tcp 853
-/etc/haproxy/haproxy.cfg 
-
-```
-global
-log 127.0.0.1 user warning
-chroot /var/lib/haproxy
-user haproxy
-group haproxy
-daemon
-maxconn 4000 
-#maxconn 1024
-pidfile /var/run/haproxy.pid
-tune.ssl.default-dh-param 2048
-ssl-default-bind-ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
-ssl-default-bind-options force-tlsv12
- 
-   # Default SSL material locations
-   ca-base /etc/ssl/certs
-   crt-base /etc/ssl/private
-defaults
-    log global
-    mode tcp
-    balance roundrobin
-    timeout http-request 10s
-    timeout queue 1m
-    timeout connect 10s
-    timeout client 1m
-    timeout server 1m
-    timeout http-keep-alive 1m
-    timeout check 10s
-
-listen dns
-    log global
-    option tcplog
-    bind 0.0.0.0:853 ssl crt /etc/haproxy/dns.seby.io/certkey.pem
-    server server1 127.0.0.1:56
-```
 
 #### certs
 

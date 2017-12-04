@@ -50,12 +50,6 @@
     # validate: nsd-checkconf %s
   notify: Reload nsd
 
-- name: Check nsd configuration
-  command: "nsd-checkconf {{ nsd_conf }}"
-  changed_when: false
-  check_mode: false
-  ignore_errors: "{{ ansible_check_mode }}"
-
 - name: Run nsd-control-setup
   command: nsd-control-setup
   args:
@@ -70,14 +64,14 @@
   when: opennic is defined and opennic
   tags: [update-opennic-tlds, unbound, unbound-config]
 
-- debug:
-    msg: "{{opennic_tlds_temp.stdout_lines}}"
+- name: Set OpenNIC TLDs - https://wiki.opennic.org/opennic/dot
+  set_fact:
+    opennic_tlds: "{{opennic_tlds_temp.stdout_lines}}"
   when: opennic is defined and opennic
   tags: [update-opennic-tlds, unbound, unbound-config]
 
-- name: Set OpenNIC tlds
-  set_fact:
-    opennic_tlds: "{{opennic_tlds_temp.stdout_lines}}"
+- debug:
+    msg: "{{opennic_tlds}}"
   when: opennic is defined and opennic
   tags: [update-opennic-tlds, unbound, unbound-config]
 
@@ -94,9 +88,12 @@
   when: opennic is defined and opennic
   tags: [update-opennic-tlds]
 
-# - name: Check nsd configuration
-#   command: "nsd-checkconf {{nsd_conf_dir}}/conf.d/opennic.conf"
-#   # check_mode: no
+- name: Check nsd configuration
+  command: "nsd-checkconf {{ nsd_conf }}"
+  changed_when: false
+  check_mode: false
+  # ignore_errors: "{{ ansible_check_mode }}"
+  ignore_errors: true
 
 # SELinux
 - name: Configure ports for SELinux (install policycoreutils-python)
