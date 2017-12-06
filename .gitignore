@@ -1,5 +1,6 @@
 group_vars/all/secrets
 *.retry
+*.log
 temp
 hosts
 venv

@@ -1,26 +1,24 @@
 #!/bin/bash
 
-if command -v travis >/dev/null 2>&1; then
-    travis lint .travis.yml
-else
+if ! command -v travis >/dev/null 2>&1; then
     gem install travis --no-rdoc --no-ri
 fi
 
-if command -v ansible-playbook >/dev/null 2>&1; then
-    ansible-playbook playbook.yml -i hosts --syntax-check
-else
+if ! command -v ansible-playbook >/dev/null 2>&1; then
     pip install ansible
 fi
 
-if command -v yamllint >/dev/null 2>&1; then
-    # shellcheck disable=SC2046
-    yamllint $(find . -name '*.yml') # we want word splitting
-else
+if ! command -v yamllint >/dev/null 2>&1; then
     pip install yamllint
 fi
 
-if command -v ansible-lint >/dev/null 2>&1; then
-    ansible-lint --exclude=required-roles --exclude="$HOME/.ansible/roles" playbook.yml
-else
+if ! command -v ansible-lint >/dev/null 2>&1; then
     pip install ansible-lint
 fi
+
+travis lint .travis.yml
+ansible-playbook playbook.yml -i hosts --syntax-check
+ansible-playbook test.yml -i hosts --syntax-check
+# shellcheck disable=SC2046
+yamllint $(find . -name '*.yml') # we want word splitting
+ansible-lint --exclude=required-roles --exclude="$HOME/.ansible/roles" playbook.yml

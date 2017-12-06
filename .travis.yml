@@ -21,10 +21,10 @@ install:
   - ansible-galaxy install -r requirements.yml -p required-roles
 
 script:
-  # Check the role/playbook's syntax.
-  - ansible-playbook -i 127.0.0.1, test.yml --syntax-check
+  # Check the role/playbook's syntax. Linting
+  - ./lint
   # Run the role/playbook with ansible-playbook.
-  - ansible-playbook -i 127.0.0.1, test.yml --connection=local --become
+  - ansible-playbook -i 127.0.0.1, test.yml --connection=local --become -v
   # Run the role/playbook again, checking to make sure it's idempotent.
   # - >
   #   ansible-playbook -i localhost, playbook.yml --connection=local --become
@@ -32,7 +32,4 @@ script:
   #   && (echo 'Idempotence test: pass' && exit 0)
   #   || (echo 'Idempotence test: fail' && exit 1)
   # Make a DNS request to check it's working properly
-  # - "dig @127.0.0.1 -p 53"
-  # Linting
-  - yamllint $(find . -name '*.yml')
-  # - ansible-lint --exclude=required-roles --exclude="$HOME/.ansible/roles" playbook.yml
+  - "dig @127.0.0.1 -p56"
