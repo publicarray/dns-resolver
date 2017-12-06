@@ -49,7 +49,6 @@ nsd_round_robin: "yes"
 nsd_remote_control: "yes"
 nsd_minimal_responses: "no"
 nsd_do_ip6: "yes"
-xfrd_reload_timeout: 5
 
 # [unbound] https://www.unbound.net/
 # https://www.unbound.net/documentation/unbound.conf.html
@@ -175,8 +174,10 @@ unbound:
       - 10.0.0.0/8 # private networks (RFC 1918):
       - 172.16.0.0/12
       - 192.168.0.0/16
-    # ip_ratelimit: 50
+    ratelimit: 200
+    # ratelimit-for-domain: example.com # exact match
     # ratelimit-below-domain: example.com 3
+    ip_ratelimit: 100
     # ip_ratelimit_size: 4m
   remote_control:
     control_enable: true

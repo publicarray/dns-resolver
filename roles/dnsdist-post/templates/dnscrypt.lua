@@ -54,7 +54,7 @@ function autoRenewCert() -- called approx. every second in maintenance function
     getDNSCryptBind(3):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
     getDNSCryptBind(4):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
     getDNSCryptBind(5):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
-    getDNSCryptBind(6):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
+    -- getDNSCryptBind(6):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
     -- getDNSCryptBind(7):generateAndLoadInMemoryCertificate("/etc/dnsdist/providerPrivate.key", serial, now - 60, now + 86340)
     last = now
   end
