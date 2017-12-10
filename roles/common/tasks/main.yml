@@ -35,6 +35,12 @@
     state: present
   with_items: "{{_packages}} + {{custom_packages|default([])}}"
 
+- name: Get ports index [FreeBSD]
+  command: portsnap auto
+  args:
+    creates: /usr/ports
+  when: ansible_os_family == 'FreeBSD'
+
 - name: Install ports
   portinstall:
     name: "{{item}}"
@@ -43,10 +49,6 @@
   when: ansible_os_family == 'FreeBSD'
 # freebsd-update upgrade -r 11.1-RELEASE
 #
-# - name: Update ports index [FreeBSD]
-#   command: portsnap auto; synth status
-#   when: ansible_os_family == 'FreeBSD'
-
 # synth install dns/dnsdist
 # lang/ruby23
 

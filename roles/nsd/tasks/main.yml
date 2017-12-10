@@ -19,6 +19,14 @@
     dest: "/etc/make.conf"
   when: ansible_os_family == 'FreeBSD'
 
+- name: Install nsd dependencies
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - libevent
+  when: ansible_os_family == 'FreeBSD'
+
 - name: Install nsd from port
   portinstall:
     name: nsd
@@ -60,6 +68,7 @@
   # dig @45.56.115.189 TXT tlds.opennic.glue +short | grep -v '^;' | sed s/\"//g | tr " " "\n"
   shell: "dig @45.56.115.189 TXT tlds.opennic.glue +short | grep -v '^;' | sed s/\\\"//g | tr \" \" \"\\n\""
   register: opennic_tlds_temp
+  changed_when: false
   check_mode: false
   when: opennic is defined and opennic
   tags: [update-opennic-tlds, unbound, unbound-config]

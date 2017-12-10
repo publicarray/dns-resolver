@@ -1,10 +1,30 @@
 ---
 
-# freebsd
+- name: Install dnsdist dependencies
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    # build dependecies
+    # - libatomic_ops
+    - gmake
+    - bison
+    - pkgconf
+    # lib dependecies
+    - boost-libs
+    - protobuf
+    - re2
+    - libsodium
+    - libedit
+    - lua52
+  when: ansible_os_family == 'FreeBSD'
+
+# freebsd needs 1.5GB of free memory to compile!
 - name: Install dnsdist from port
   portinstall:
     name: dns/dnsdist
     state: present
+    use_packages: true
   tags: [dnsdist_post, dnsdist]
   when: ansible_os_family == 'FreeBSD'
 
@@ -33,13 +53,13 @@
   when: ansible_os_family != 'FreeBSD'
   tags: [dnsdist_post, dnsdist]
 
-- name: Temp file permission fix (allows dnsdist to read the config file)
-  file:
-    path: /etc/dnsdist/dnsdist.conf
-    owner: dnsdist
-    group: dnsdist
-    mode: 0644
-  when: ansible_os_family != 'FreeBSD'
+# - name: Temp file permission fix (allows dnsdist to read the config file)
+#   file:
+#     path: /etc/dnsdist/dnsdist.conf
+#     owner: dnsdist
+#     group: dnsdist
+#     mode: 0644
+#   when: ansible_os_family != 'FreeBSD'
 
 # - debug: "var=ansible_default_ipv4"
 
