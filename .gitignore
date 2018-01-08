@@ -8,3 +8,6 @@ required-roles
 .molecule
 .vagrant
 ansible_fact_cache
+vagrant.ssh.config
+## host_vars sets unbound.server.interface and peer_ips
+host_vars/*.*.*.*

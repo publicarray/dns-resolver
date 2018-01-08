@@ -43,7 +43,7 @@ opennic: true
 nsd_compile_flags: "--enable-root-server"
 nsd_ip_addresses: ["127.0.0.1"]
 nsd_reuseport: "yes"
-nsd_port: 57
+nsd_port: 57 # 40
 nsd_hide_version: "yes"
 nsd_round_robin: "yes"
 nsd_remote_control: "yes"
@@ -59,11 +59,15 @@ unbound_compile_version: 1.6.7
 unbound_compile_sha256: 4e7bd43d827004c6d51bef73adf941798e4588bdb40de5e79d89034d69751c9f
 # unbound_compile_config: "--enable-dnscrypt --enable-gost --enable-ed25519 --with-libevent --with-username={{unbound.server.username|default(unbound)}} --with-run-dir={{unbound.server.directory}} --with-conf-file={{unbound.server.directory}}/unbound.conf"
 unbound_optimise: true
-unbound_optimise_memory: 40
+unbound_optimise_memory: 30
 unbound_tls_domain: dns.seby.io
-unbound_tls_cert_provider: acme-cf
-unbound_tls_ca: https://acme-v01.api.letsencrypt.org/directory
-unbound_tls_ca_terms: https://acme-v01.api.letsencrypt.org/terms
+unbound_tls_cert_provider: acme
+unbound_tls_acme_auto_upgrade: 1
+unbound_tls_acme_mode: dns dns_cf
+unbound_tls_acme_staging: false
+unbound_tls_acme_force: false
+# unbound_tls_acme_ecc: true
+unbound_tls_acme_custom: --dnssleep 10 --force
 opennic_address: "{{nsd_ip_addresses|first}}@{{nsd_port}}"
 unbound:
   server:
@@ -71,23 +75,21 @@ unbound:
     verbosity: 0 # no verbosity, only errors
     use_syslog: yes
     log_time_ascii: yes
-    val_log_level: 0 # log dnssec validation errors for investigating problems (domain, dns server ip and reason)
+    val_log_level: 0 # 1 = log dnssec validation errors for investigating problems 2 = (domain, dns server ip and reason)
     # statistics_interval: 86400 # once a day print latency statistics
     pidfile: unbound.pid
     statistics_interval: 0 # for munin graphs
     extended_statistics: yes # for munin graphs
     statistics_cumulative: no # for munin graphs
     ## Server
-    # interface: [127.0.0.1, '::1']
-    interface: [127.0.0.1, '::1', 0.0.0.0@853, '::0@853']
-    port: "56"
-    ssl_service_key: "private.key"
-    ssl_service_pem: "certificate.pem"
+    interface: [127.0.0.1, '::1', 0.0.0.0@853, '::0@853'] # overwritten in host_vars
+    port: 56
+    ssl_service_key: private.key
+    ssl_service_pem: certificate.pem
     ssl_port: 853
-    root_hints: "root.hints"
+    root_hints: root.hints
     udp_upstream_without_downstream: yes
     access_control: [0.0.0.0/0 allow, '::/0 allow']
-    # access_control: [0.0.0.0/0 deny, 127.0.0.1 allow]
     ## Privacy
     qname_minimisation: yes
     # use_caps_for_id: yes # some older servers don't handle this properly
@@ -124,17 +126,17 @@ unbound:
       - z. static
       - domain. static
       - virtualmin. static
-      - "2.dnscrypt-cert.{{ ansible_hostname }} refuse"
     ## Performance
-    # so_reuseport: yes
+    so_reuseport: yes
     serve_expired: yes
     prefetch: yes
     prefetch_key: yes
     rrset_roundrobin: yes # possible load distribution for servers
     num_queries_per_thread: 2048
-    outgoing_range: 4096 # (num-queries-per-thread * 2)
-    outgoing_port_avoid: 5546 # fix unable to bind to port error (centOS)
+    outgoing_range: 4096 # (num-queries-per-thread * 2) # allowed num of file descriptors
+    # outgoing_port_avoid: 5546 # fix unable to bind to port error (centOS)
     incoming_num_tcp: 200
+    outgoing-num-tcp: 20
     # Sydney, AU to New York, USA (http://nj-us-ping.vultr.com/) avg ping 224ms
     # Sydney, AU to Paris, FR (http://par-fr-ping.vultr.com) avg ping 309ms
     # Sydney, AU to Amsterdam, NL (http://ams-nl-ping.vultr.com) avg ping 318ms
@@ -143,12 +145,12 @@ unbound:
     # so_rcvbuf: 4m
     # so_sndbuf: 4m
     neg_cache_size: 25m
-    cache_min_ttl: 300 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
+    cache_min_ttl: 600 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
     cache_max_ttl: 86400 # 14400=4h 86400=1day (default)
     # cache_max_negative_ttl: 3600 # 1h (default)
     # val-bogus-ttl: 120 # 60 (default)
     infra_host_ttl: 3600 # 1h, 900=15min (default) http://www.unbound.net/documentation/info_timeout.html
-    infra_cache_numhosts: 50000
+    # infra_cache_numhosts: 50000 # already set with unbound_optimise=true
     ## Security
     hide_identity: yes
     hide_version: yes
@@ -174,16 +176,25 @@ unbound:
       - 10.0.0.0/8 # private networks (RFC 1918):
       - 172.16.0.0/12
       - 192.168.0.0/16
-    ratelimit: 200
+    ratelimit: 200 # prevent being part of a DDoS to authoritative
     # ratelimit-for-domain: example.com # exact match
     # ratelimit-below-domain: example.com 3
-    ip_ratelimit: 100
+    ip_ratelimit: 50 # prevent client DoS and other abuse
     # ip_ratelimit_size: 4m
+    ###
+    ## Vultr is filtering domains that seriously impacts the performance of neighboring instances.
+    ## Vultr blocks this domain and less than 10 others around crypto currency mining and automated traffic bots.
+  forward_zone:
+    forward_addr: 9.9.9.9@853 # quad9.net
+    forward_ssl_upstream: yes
+    name: minexmr.com
+  # local_zone: "tracker.publicbt.com" static # Nameserver (lv3ns2.ffdns.net) doesn't respond to publicbt.com: http://dnsviz.net/d/tracker.publicbt.com/dnssec/
+  # local_zone: "tracker.flashtorrents.org" static # Nameserver (nl319.edns1.com) doesn't respond to flashtorrents.org: http://dnsviz.net/d/tracker.flashtorrents.org/dnssec/
   remote_control:
     control_enable: true
     control_interface: 127.0.0.1
 
-# [Generic DNScrypt]
+# [Generic DNSCrypt]
 dnscrypt_provider_name: '2.dnscrypt-cert.dns.seby.io'
 
 # [dnscrypt-wrapper] https://github.com/cofyc/dnscrypt-wrapper
@@ -197,18 +208,12 @@ dnsdist: true
 dnsdist_install_repo: "{{ dnsdist_powerdns_repo_12 }}"
 # dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
 dnsdist_locals: []
-dnsdist_controlsocket: "127.0.0.1"
+# dnsdist_controlsocket: "127.0.0.1"
 # dnsdist_setkey: "" # Change this
 # dnsdist_acls: []
 # dnsdist_servers: ['127.0.0.1:55']
 
 dnsdist_config: |
-  --[[
-  # This file is managed by Ansible.
-  #
-  # template: /usr/local/etc/ansible/roles/PowerDNS.dnsdist/templates/dnsdist.conf.j2
-  --]]
-
   --General settings
   setACL({'0.0.0.0/0', '::/0'}) --allow WWW
   controlSocket("127.0.0.1")
@@ -216,13 +221,13 @@ dnsdist_config: |
   setTCPSendTimeout(4)
   setTCPUseSinglePipe(true)
   setStaleCacheEntriesTTL(86400) --86400sec = 24h
-  setServerPolicy(firstAvailable) --options:firstAvailable,whashed,wrandom,roundrobin (Default leastOutstanding)
-  setRingBuffersSize(250) --set the capacity of the ringbuffers used for live traffic inspection (default 10000)
+  setServerPolicy(leastOutstanding) --options:firstAvailable,whashed,wrandom,roundrobin (Default leastOutstanding)
+  setRingBuffersSize(250) --set the capacity of the ring buffers used for live traffic inspection and actions (default 10000)
 
   --Backend servers / Packet Cache
   pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
   newServer({address="127.0.0.1:{{unbound.server.port}}", name="unbound", weight=10})
-  --newServer({address="9.9.9.9",  name="Quad9", qps=50, order=100}) --last resort/fallback if unbound is down https://www.quad9.net (blocklist)
+  --newServer({address="9.9.9.9",  name="Quad9", qps=50, order=100}) --last resort/fallback if unbound is down https://www.quad9.net (block list)
   --newServer({address="9.9.9.10", name="Quad9", qps=50, order=100}) --last resort/fallback if unbound is down https://www.quad9.net
   --newServer({address="37.235.1.174", name="FreeDNS", qps=10, order=100}) --last resort/fallback if unbound is down
   --newServer({address="37.235.1.177", name="FreeDNS", qps=10, order=100}) --last resort/fallback if unbound is down
@@ -246,7 +251,6 @@ dnsdist_config: |
   includeDirectory("/etc/dnsdist/config.d/")
 
   local last = 0
-  serial = 0
   function maintenance()
     addDynBlocks(exceedQRate(80, 10), "Exceeded query rate", 600) --block IPs greater than 80qps over 10 sec for 10 min
     addDynBlocks(exceedRespByterate(20000, 10), "Exceeded byte rate", 600) --block IPs that request more than 20 kilobytes/s over 10sec for 10 min
@@ -263,7 +267,6 @@ dnsdist_config: |
   -- these domains have high error rate or the DNS responses time-out
   addAction("tracker.publicbt.com", RCodeAction(3)) -- No Response http://dnsviz.net/d/tracker.publicbt.com/dnssec/ http://dnscheck.pingdom.com/?domain=publicbt.com
   addAction("tracker.flashtorrents.org", RCodeAction(2)) -- Name Server is down http://dnscheck.pingdom.com/?domain=flashtorrents.org
-
 # [netdata]
 netdata: false
 

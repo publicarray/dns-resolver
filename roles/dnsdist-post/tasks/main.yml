@@ -19,7 +19,7 @@
     - lua52
   when: ansible_os_family == 'FreeBSD'
 
-# freebsd needs 1.5GB of free memory to compile!
+# note: freebsd needs 1.5GB of free memory to compile dnsdist!
 - name: Install dnsdist from port
   portinstall:
     name: dns/dnsdist
