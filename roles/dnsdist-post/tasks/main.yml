@@ -33,6 +33,7 @@
     src: dnsdist.conf
     dest: /usr/local/etc/dnsdist.conf
   when: ansible_os_family == 'FreeBSD'
+  notify: Restart dnsdist
   tags: [dnsdist_post, dnsdist]
 
 # TODO: sysvinit and upstart
