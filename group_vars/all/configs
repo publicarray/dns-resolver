@@ -67,7 +67,7 @@ unbound_tls_acme_mode: dns dns_cf
 unbound_tls_acme_staging: false
 unbound_tls_acme_force: false
 # unbound_tls_acme_ecc: true
-unbound_tls_acme_custom: --dnssleep 10 --force
+unbound_tls_acme_custom: --dnssleep 10
 opennic_address: "{{nsd_ip_addresses|first}}@{{nsd_port}}"
 unbound:
   server:
