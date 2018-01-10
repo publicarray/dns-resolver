@@ -12,7 +12,7 @@
 
 - src: https://github.com/publicarray/ansible-role-unbound
   scm: git
-  version: acme.sh
+  version: master
   name: publicarray.unbound
 
 - src: https://github.com/jnv/ansible-role-unattended-upgrades
