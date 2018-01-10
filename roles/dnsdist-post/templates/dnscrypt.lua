@@ -16,12 +16,16 @@ end
 --Generate init Cert (Expires in 24 hours!)
 last = os.time()
 generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0", last, last - 60 , last + 86340)
-
+{#
 {%- if ansible_default_ipv4.address is defined %}
 {%- set ip = ansible_default_ipv4.address %}
 {%- else %}
 {%- set ip = '0.0.0.0' %}
 {%- endif %}
+#}
+
+{%- set ip = '0.0.0.0' %}
+
 {%- if ansible_default_ipv6.address is defined %}
 {%- set ip6 = ansible_default_ipv6.address %}
 {%- else %}
