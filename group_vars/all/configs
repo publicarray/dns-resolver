@@ -82,7 +82,7 @@ unbound:
     extended_statistics: yes # for munin graphs
     statistics_cumulative: no # for munin graphs
     ## Server
-    interface: [127.0.0.1, "{{ansible_vtnet1.ipv4[0].address}}", '::1', 0.0.0.0@853, '::0@853']
+    interface: [127.0.0.1, '::1', 0.0.0.0@853, '::0@853']  # overwritten in host_vars to add {{ansible_vtnet1.ipv4[0].address}}
     port: 56
     ssl_service_key: private.key
     ssl_service_pem: certificate.pem
