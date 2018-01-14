@@ -4,4 +4,4 @@ _packages:
   - bash
   - nano
   - git
-  - bind-tools  # dig command
+  # dig command is pre-installed

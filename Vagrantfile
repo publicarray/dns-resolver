@@ -37,8 +37,15 @@ Vagrant.configure("2") do |config|
     node.vm.synced_folder ".", "/vagrant", disabled: true
   end
 
+  config.vm.define "openbsd6", autostart: false do |node|
+    node.vm.box = "generic/openbsd6"
+    node.ssh.shell = "sh"
+  end
+
   config.vm.provision :shell, inline: <<-SHELL
-    if command -v yum >/dev/null 2>&1; then
+    if command -v python>/dev/null 2>&1; then
+      exit 0
+    elif command -v yum >/dev/null 2>&1; then
       yum check-update
       yum install python
     elif command -v apt-get >/dev/null 2>&1; then
@@ -47,6 +54,15 @@ Vagrant.configure("2") do |config|
     elif command -v pkg >/dev/null 2>&1; then
       pkg update
       pkg install -y python
+    elif command -v pkg_add >/dev/null 2>&1; then
+      pkg_add -Iz python-2.7
+      ln -sf /usr/local/bin/python2.7 /usr/local/bin/python
+      ln -sf /usr/local/bin/python2.7-2to3 /usr/local/bin/2to3
+      ln -sf /usr/local/bin/python2.7-config /usr/local/bin/python-config
+      ln -sf /usr/local/bin/pydoc2.7  /usr/local/bin/pydoc
+    else
+      echo "No compatable package manager found"
+      exit 1
     fi
   SHELL
 
