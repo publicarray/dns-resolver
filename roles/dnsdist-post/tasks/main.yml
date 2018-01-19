@@ -1,5 +1,11 @@
 ---
 
+- name: Read platform varables
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
+  tags: [always, update-opennic-tlds]
+  when: ansible_os_family == 'FreeBSD' or ansible_os_family == 'OpenBSD'
+
 - name: Install dnsdist dependencies
   package:
     name: "{{item}}"
@@ -17,10 +23,11 @@
     - libsodium
     - libedit
     - lua52
+  tags: [dnsdist_post, dnsdist]
   when: ansible_os_family == 'FreeBSD'
 
 # note: freebsd needs 1.5GB of free memory to compile dnsdist!
-- name: Install dnsdist from port
+- name: Install dnsdist from port - FreeBSD
   portinstall:
     name: dns/dnsdist
     state: present
@@ -28,11 +35,18 @@
   tags: [dnsdist_post, dnsdist]
   when: ansible_os_family == 'FreeBSD'
 
+- name: Install dnsdist from port - OpenBSD
+  package:
+    name: dnsdist
+    state: present
+  tags: [dnsdist_post, dnsdist]
+  when: ansible_os_family == 'OpenBSD'
+
 - name: Copy dnsdist config
   template:
     src: dnsdist.conf
-    dest: /usr/local/etc/dnsdist.conf
-  when: ansible_os_family == 'FreeBSD'
+    dest: "{{_dnsdist.config}}"
+  when: ansible_os_family == 'FreeBSD' or ansible_os_family == 'OpenBSD'
   notify: Restart dnsdist
   tags: [dnsdist_post, dnsdist]
 

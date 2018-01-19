@@ -1,0 +1,2 @@
+_dnsdist:
+  config: /usr/local/etc/dnsdist.conf

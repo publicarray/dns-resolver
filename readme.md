@@ -39,6 +39,13 @@ $ dnsdist --client
 
 # Test
 
+## Test with [vagrant](https://www.vagrantup.com/) (recommended)
+
+```bash
+brew cask install vagrant virtualbox
+vagrant
+```
+
 ## Test with [molecule](https://molecule.readthedocs.io/)
 
 ### first time setup
