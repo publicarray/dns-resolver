@@ -38,7 +38,7 @@ daily_base_options: "{{ hourly_base_options }}"
 
 # [OpenNIC / nsd]
 opennic: true
-# nsd_chroot_enable: true
+nsd_chroot_enable: true
 # nsd_chroot_dir: /opt/nsd
 nsd_compile_flags: "--enable-root-server"
 nsd_ip_addresses: ["127.0.0.1"]
@@ -53,7 +53,6 @@ nsd_do_ip6: "yes"
 # [unbound] https://www.unbound.net/
 # https://www.unbound.net/documentation/unbound.conf.html
 # https://www.unbound.net/documentation/howto_optimise.html
-# unbound_compile: true
 unbound_compile: true
 unbound_compile_version: 1.6.7
 unbound_compile_sha256: 4e7bd43d827004c6d51bef73adf941798e4588bdb40de5e79d89034d69751c9f

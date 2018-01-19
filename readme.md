@@ -43,7 +43,7 @@ $ dnsdist --client
 
 ```bash
 brew cask install vagrant virtualbox
-vagrant
+vagrant up
 ```
 
 ## Test with [molecule](https://molecule.readthedocs.io/)
