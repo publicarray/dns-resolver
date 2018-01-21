@@ -28,7 +28,7 @@ keybase verify -i message.txt.sig
 ## Networking
 
 ```sh
-netstat -su
+netstat -s
 
 ```
 
@@ -165,13 +165,13 @@ https://getdnsapi.net/documentation/readme/
 
 ### Stubby
 
+#### Stubby on MacOS
+
 ```sh
-brew install getdns --with-libuv --with-libev
-sudo nano /etc/stubby.conf 
+brew install stubby
 ```
 
-Example /etc/stubby.yml 
-
+Example stubby.yml
 
 ```yml
 dns_transport_list: [GETDNS_TRANSPORT_TLS]
@@ -187,7 +187,7 @@ timeout: 12000 # 12 sec (default 5s)
 #tls_connection_retries: 5
 listen_addresses:
   - 127.0.0.1@44
-  - 0::1@44
+#  - 0::1@44
 upstream_recursive_servers:
   - address_data: 45.76.113.31
     tls_auth_name: "dns.seby.io"
@@ -199,45 +199,13 @@ upstream_recursive_servers:
      tls_pubkey_pinset:
        - digest: "sha256"
          value: MujBQ+U0p2eZLTnQ2KGEqs+fPLYV/1DnpZDjBDPwUqQ=
-
 ```
+
+Show all options and their current value, checks config file for syntax errors
 
 ```sh
 stubby -i
-
-stubby -h
-getdns_query -h
 ```
-
-#### Stubby on MacOS
-
-~/Library/LaunchAgents/stubby.plist
-
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple$
-<plist version="1.0">
-  <dict>
-    <key>Label</key>
-    <string>stubby</string>
-    <key>ProgramArguments</key>
-    <array>
-      <string>/usr/local/bin/stubby</string>
-      <string>-C</string>
-      <string>/etc/stubby.conf</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <true/>
-  </dict>
-</plist>
-```
-
-```
-launchctl load -w ~/Library/LaunchAgents/stubby.plist
-```
-
 
 ## Linux TCP Fast Open
 
@@ -293,7 +261,7 @@ options         TCP_RFC7413
 
 **Note**
 
-Don't forgot to edit the `/etc/freebsd-update.conf` file to prevent a routine `freebsd-update fetch install` overwriting the custom kernel.
+Don't forgot to edit the `/etc/freebsd-update.conf` file to prevent a routine `freebsd-update fetch install` overwriting our custom kernel with the Generic kernel.
 
 /etc/freebsd-update.conf
 ```
