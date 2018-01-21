@@ -245,9 +245,9 @@ net.inet.tcp.fastopen.enabled=1
 See implementation file for more sysctl options: [sys/netinet/tcp_fastopen.c](https://svnweb.freebsd.org/base/head/sys/netinet/tcp_fastopen.c?view=markup)
 
 
-[Compile kernel](https://www.freebsd.org/doc/en/books/handbook/kernelconfig-building.html) with MYKERNEL file
+### [Compile the kernel](https://www.freebsd.org/doc/en/books/handbook/kernelconfig-building.html) with MYKERNEL file
 
-Use something like `pkg install subversion && svn co https://svn.FreeBSD.org/base/releng/$(freebsd-version | awk -F '-' '{print $1}')/usr/src` to get the source
+Use something like `pkg install subversion && svn co https://svn.FreeBSD.org/base/releng/$(freebsd-version | awk -F '-' '{print $1}')/usr/src` to get the source.
 
 /usr/src/sys/amd64/conf/MYKERNEL
 
@@ -261,7 +261,7 @@ options         TCP_RFC7413
 
 **Note**
 
-Don't forgot to edit the `/etc/freebsd-update.conf` file to prevent a routine `freebsd-update fetch install` overwriting our custom kernel with the Generic kernel.
+Don't forget to edit the `/etc/freebsd-update.conf` file to prevent a routine `freebsd-update fetch install` overwriting our custom kernel with the Generic kernel.
 
 /etc/freebsd-update.conf
 ```
