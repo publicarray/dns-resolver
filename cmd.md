@@ -1,6 +1,11 @@
-## ansible
+# Common commands for administering a DNS server
+
+http://www.networksorcery.com/enp/protocol/dns.htm
+
+## Ansible
 
 Get facts: `ansible all -m setup -i hosts -u root`
+
 Get facts-localhost: `ansible all -m setup -i "localhost," -c local`
 
 ## Sign message with keybase pgp key
@@ -20,10 +25,16 @@ keybase sign -i message.txt -o message.txt.sig
 keybase verify -i message.txt.sig 
 ```
 
+## Networking
+
+```sh
+netstat -su
+
+```
+
 ## dnsdist
 
-http://www.networksorcery.com/enp/protocol/dns.htm
-http://dnsdist.org/
+https://dnsdist.org/
 
 ### stats/debugging
 
@@ -50,11 +61,6 @@ showRules()
 showDynBlocks()
 ```
 
-## Linux
-```
-netstat -su
-
-```
 ### actions/rules
 
 http://dnsdist.org/rules-actions.html?highlight=addaction#packet-policies
@@ -106,9 +112,9 @@ exceedQTypeRate(type, rate, seconds) -- exceed rate queries/s for queries of typ
 ```
 
 
-### unbound
+## unbound
 
-```
+```sh
 unbound-control get_option cache-min-ttl
 unbound-control set_option cache-min-ttl: 60 # change option on the fly
 unbound-control stats_noreset
@@ -134,10 +140,12 @@ iptables -L --line-numbers
 iptables -D INPUT 2
 ```
 
-# Test DNS
 
-https://pkgs.org/download/dnsperf
+# Test DNS performance/load
 
+https://github.com/cobblau/dnsperf
+
+https://github.com/jedisct1/dnsblast
 
 # DNS-over-(D)TLS
 
@@ -155,44 +163,42 @@ https://getdnsapi.net/blog/dns-privacy-daemon-stubby/
 
 https://getdnsapi.net/documentation/readme/
 
+### Stubby
+
 ```sh
 brew install getdns --with-libuv --with-libev
 sudo nano /etc/stubby.conf 
 ```
 
-/etc/stubby.conf 
+Example /etc/stubby.yml 
 
 
-```json
-{ resolution_type: GETDNS_RESOLUTION_STUB
-, dns_transport_list: [ GETDNS_TRANSPORT_TLS ]
-, tls_authentication: GETDNS_AUTHENTICATION_REQUIRED
-, tls_connection_retries: 9999999999
-, tls_query_padding_blocksize: 0
-, edns_client_subnet_private : 1
-, idle_timeout: 30000
-, listen_addresses: 
-  [ { address_data: 127.0.0.1
-    , address_type: "IPv4"
-    , port: 60
-    , tls_port: 60
-  },
-  { address_data: 0::1
-    , address_type: "IPv6"
-    , port: 60
-    , tls_port: 60
-  }, ]
-, round_robin_upstreams: 1
-, upstream_recursive_servers:
-  [ { address_data: 45.76.113.31
-    , tls_auth_name: "dns.seby.io"
-    , tls_pubkey_pinset:
-      [ { digest: "sha256"
-        , value: u8HJKdVlrkl0cz7C9wETsvWGtwoB4WhZ8QXW+ky3E/s=
-      } ]
-    }
-  ]
-}
+```yml
+dns_transport_list: [GETDNS_TRANSPORT_TLS]
+tls_authentication: GETDNS_AUTHENTICATION_REQUIRED
+limit_outstanding_queries: 16
+# EDNS0 option for keepalive idle timeout in ms as specified in
+# https://tools.ietf.org/html/rfc7828 This keeps idle TLS connections open
+idle_timeout: 60000 # 60 sec, 1 min
+# Specify the timeout on getting a response to an individual request
+timeout: 12000 # 12 sec (default 5s)
+# Control the maximum number of connection failures that will be permitted
+# before Stubby backs-off from using an individual upstream (default 2)
+#tls_connection_retries: 5
+listen_addresses:
+  - 127.0.0.1@44
+  - 0::1@44
+upstream_recursive_servers:
+  - address_data: 45.76.113.31
+    tls_auth_name: "dns.seby.io"
+    tls_pubkey_pinset:
+      - digest: "sha256"
+        value: l2ZfXm/PituWJpi8lZwYqh9JREvmt6pmkYDcBUO9fK8=
+  - address_data: 9.9.9.9
+     tls_auth_name: "dns.quad9.net"
+     tls_pubkey_pinset:
+       - digest: "sha256"
+         value: MujBQ+U0p2eZLTnQ2KGEqs+fPLYV/1DnpZDjBDPwUqQ=
 
 ```
 
@@ -203,7 +209,9 @@ stubby -h
 getdns_query -h
 ```
 
-~/Library/LaunchAgents/stubby.plist            
+#### Stubby on MacOS
+
+~/Library/LaunchAgents/stubby.plist
 
 ```
 <?xml version="1.0" encoding="UTF-8"?>
@@ -230,189 +238,8 @@ getdns_query -h
 launchctl load -w ~/Library/LaunchAgents/stubby.plist
 ```
 
-## Recurser:
 
-https://dnsprivacy.org/wiki/display/DP/Running+a+DNS+Privacy+server
-
-
-#### certs
-
-```sh
-wget https://raw.githubusercontent.com/lukas2511/dehydrated/master/dehydrated
-chmod +x ./dehydrated
-mkdir /etc/dehydrated
-
-yum -y install python-pip gcc python-dev curl libffi-dev openssl-devel
-# pip install requests[security]
-pip install dns-lexicon
-
-```
-
-/etc/dehydrated/config or /usr/local/etc/dehydrated/config
-
-```
-CA="https://acme-v01.api.letsencrypt.org/directory"
-#CA="https://acme-staging.api.letsencrypt.org/directory"
-LICENSE="https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf"
-CERTDIR=/etc/haproxy
-CHALLENGETYPE="dns-01"
-HOOK=/etc/dehydrated/hook.sh
-PRIVATE_KEY_RENEW="no"
-PRIVATE_KEY_ROLLOVER="no"
-#CONTACT_EMAIL=alice@example.com
-export PROVIDER=cloudflare
-export LEXICON_CLOUDFLARE_USERNAME=example@domain.com
-export LEXICON_CLOUDFLARE_TOKEN=
-```
-
-/etc/dehydrated/hook.sh
-
-source: https://blog.thesparktree.com/generating-intranet-and-private-network-ssl
-
-```
-#!/usr/bin/env bash
-#
-# Example how to deploy a DNS challange using lexicon
-
-set -e
-set -u
-set -o pipefail
-
-export PROVIDER=${PROVIDER:-"cloudflare"}
-
-function deploy_challenge {
-    local DOMAIN="${1}" TOKEN_FILENAME="${2}" TOKEN_VALUE="${3}"
-
-    echo "deploy_challenge called: ${DOMAIN}, ${TOKEN_FILENAME}, ${TOKEN_VALUE}"
-
-    lexicon $PROVIDER create ${DOMAIN} TXT --name="_acme-challenge.${DOMAIN}." --content="${TOKEN_VALUE}"
-
-    sleep 30
-
-    # This hook is called once for every domain that needs to be
-    # validated, including any alternative names you may have listed.
-    #
-    # Parameters:
-    # - DOMAIN
-    #   The domain name (CN or subject alternative name) being
-    #   validated.
-    # - TOKEN_FILENAME
-    #   The name of the file containing the token to be served for HTTP
-    #   validation. Should be served by your web server as
-    #   /.well-known/acme-challenge/${TOKEN_FILENAME}.
-    # - TOKEN_VALUE
-    #   The token value that needs to be served for validation. For DNS
-    #   validation, this is what you want to put in the _acme-challenge
-    #   TXT record. For HTTP validation it is the value that is expected
-    #   be found in the $TOKEN_FILENAME file.
-}
-
-function clean_challenge {
-    local DOMAIN="${1}" TOKEN_FILENAME="${2}" TOKEN_VALUE="${3}"
-
-    echo "clean_challenge called: ${DOMAIN}, ${TOKEN_FILENAME}, ${TOKEN_VALUE}"
-
-    lexicon $PROVIDER delete ${DOMAIN} TXT --name="_acme-challenge.${DOMAIN}." --content="${TOKEN_VALUE}"
-
-    # This hook is called after attempting to validate each domain,
-    # whether or not validation was successful. Here you can delete
-    # files or DNS records that are no longer needed.
-    #
-    # The parameters are the same as for deploy_challenge.
-}
-
-function deploy_cert {
-    local DOMAIN="${1}" KEYFILE="${2}" CERTFILE="${3}" FULLCHAINFILE="${4}" CHAINFILE="${5}"
-
-    echo "deploy_cert called: ${DOMAIN}, ${KEYFILE}, ${CERTFILE}, ${FULLCHAINFILE}, ${CHAINFILE}"
-
-    # This hook is called once for each certificate that has been
-    # produced. Here you might, for instance, copy your new certificates
-    # to service-specific locations and reload the service.
-    #
-    # Parameters:
-    # - DOMAIN
-    #   The primary domain name, i.e. the certificate common
-    #   name (CN).
-    # - KEYFILE
-    #   The path of the file containing the private key.
-    # - CERTFILE
-    #   The path of the file containing the signed certificate.
-    # - FULLCHAINFILE
-    #   The path of the file containing the full certificate chain.
-    # - CHAINFILE
-    #   The path of the file containing the intermediate certificate(s).
-}
-
-function unchanged_cert {
-    local DOMAIN="${1}" KEYFILE="${2}" CERTFILE="${3}" FULLCHAINFILE="${4}" CHAINFILE="${5}"
-
-    echo "unchanged_cert called: ${DOMAIN}, ${KEYFILE}, ${CERTFILE}, ${FULLCHAINFILE}, ${CHAINFILE}"
-
-    # This hook is called once for each certificate that is still
-    # valid and therefore wasn't reissued.
-    #
-    # Parameters:
-    # - DOMAIN
-    #   The primary domain name, i.e. the certificate common
-    #   name (CN).
-    # - KEYFILE
-    #   The path of the file containing the private key.
-    # - CERTFILE
-    #   The path of the file containing the signed certificate.
-    # - FULLCHAINFILE
-    #   The path of the file containing the full certificate chain.
-    # - CHAINFILE
-    #   The path of the file containing the intermediate certificate(s).
-}
-
-exit_hook() {
-  # This hook is called at the end of a dehydrated command and can be used
-  # to do some final (cleanup or other) tasks.
-
-  :
-}
-
-HANDLER=$1; shift; $HANDLER "$@"
-```
-
-/etc/dehydrated/domains.txt
-
-```
-dns.seby.io www.dns.seby.io
-```
-
-```sh
-./dehydrated -c
-cat /etc/haproxy/dns.seby.io/fullchain.pem /etc/haproxy/dns.seby.io/privkey.pem  > /etc/haproxy/dns.seby.io/certkey.pem
-```
-https://report-uri.io/home/pubkey_hash
-
-#### haproxy logs 
-
-/etc/rsyslog.conf 
-
-```
-# Provides UDP syslog reception
-$ModLoad imudp
-$UDPServerAddress 127.0.0.1
-$UDPServerRun 514
-```
-
-```
-service rsyslog restart
-```
-
-
-## Test
-
-https://dnsprivacy.org/wiki/display/DP/DNS+Privacy+Test+Servers
-
-https://github.com/Sinodun/dnsperf-tcp
-
-
-
-### TCP fast open
+## Linux TCP Fast Open
 
 
 /etc/sysctl.conf
@@ -437,4 +264,38 @@ cat /proc/sys/net/ipv4/tcp_fastopen
 grep '^TcpExt:' /proc/net/netstat | cut -d ' ' -f 87-92  | column -t
 ip tcp_metrics show 127.0.0.1
 ip tcp_metrics
+```
+
+## FreeBSD TCP Fast Open
+
+/etc/sysctl.conf
+
+```
+net.inet.tcp.fastopen.enabled=1
+```
+
+See implementation file for more sysctl options: [sys/netinet/tcp_fastopen.c] https://svnweb.freebsd.org/base/head/sys/netinet/tcp_fastopen.c?view=markup
+
+
+[Compile kernel](https://www.freebsd.org/doc/en/books/handbook/kernelconfig-building.html) with MYKERNEL file
+
+Use something like `pkg install subversion && svn co https://svn.FreeBSD.org/base/releng/$(freebsd-version | awk -F '-' '{print $1}')/usr/src` to get the source
+
+/usr/src/sys/amd64/conf/MYKERNEL
+
+```sh
+include GENERIC
+ident MYKERNEL
+
+# TFO TCP Fast Open TCP_FASTOPEN (enable with `sysctl -w net.inet.tcp.fastopen.enabled=1`)
+options         TCP_RFC7413
+```
+
+**Note**
+
+Don't forgot to edit the `/etc/freebsd-update.conf` file to prevent a routine `freebsd-update fetch install` overwriting the custom kernel.
+
+/etc/freebsd-update.conf
+```
+Components src world
 ```
