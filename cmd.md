@@ -242,7 +242,7 @@ ip tcp_metrics
 net.inet.tcp.fastopen.enabled=1
 ```
 
-See implementation file for more sysctl options: [sys/netinet/tcp_fastopen.c] https://svnweb.freebsd.org/base/head/sys/netinet/tcp_fastopen.c?view=markup
+See implementation file for more sysctl options: [sys/netinet/tcp_fastopen.c](https://svnweb.freebsd.org/base/head/sys/netinet/tcp_fastopen.c?view=markup)
 
 
 [Compile kernel](https://www.freebsd.org/doc/en/books/handbook/kernelconfig-building.html) with MYKERNEL file
