@@ -105,6 +105,24 @@ exceedRespByterate(rate, seconds) -- exeeded rate bytes/s answers over seconds s
 exceedQTypeRate(type, rate, seconds) -- exceed rate queries/s for queries of type type over seconds seconds
 ```
 
+
+### unbound
+
+```
+unbound-control get_option cache-min-ttl
+unbound-control set_option cache-min-ttl: 60 # change option on the fly
+unbound-control stats_noreset
+unbound-control ratelimit_list
+unbound-control ip_ratelimit_list
+unbound-control dump_cache > unbound_cache
+unbound-control reload
+unbound-control load_cache < unbound_cache
+
+unbound-host -v -f /usr/local/etc/unbound/root.key -t A example.com # useful for running a query through unbound
+unbound-host -v -f /usr/local/etc/unbound/root.key -d -d -t A example.com # useful for debugging
+drill -S example.com # chase signature(s)
+```
+
 ## iptables
 
 https://www.cyberciti.biz/tips/linux-iptables-examples.html
