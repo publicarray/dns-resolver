@@ -1,55 +1,55 @@
 Vagrant.configure("2") do |config|
 
-  # https://wiki.ubuntu.com/Releases
-  # https://app.vagrantup.com/ubuntu/
-  # config.vm.define "ubuntu18.04", autostart: false do |node| # development #LTS
-  #   node.vm.box = "ubuntu/bionic64"
+  # # https://wiki.ubuntu.com/Releases
+  # # https://app.vagrantup.com/ubuntu/
+  # # config.vm.define "ubuntu18.04", autostart: false do |node| # development #LTS
+  # #   node.vm.box = "ubuntu/bionic64"
+  # # end
+
+  # config.vm.define "ubuntu17.10", primary: true do |node|
+  #   node.vm.box = "ubuntu/artful64"
+  #   # on 1st run permissions are not properly read, a re-run of the playbook will fix this.
+  #   # fatal: [ubuntu17.10]: FAILED! => {"changed": false, "msg":
+  #   # "Unable to start service nsd: Job for nsd.service failed because the control process exited with error code.
+  #   # \nSee \"systemctl  status nsd.service\" and \"journalctl  -xe\" for details.\n"}
+  #   # Solution: re-run the ansible playbook
   # end
 
-  config.vm.define "ubuntu17.10", primary: true do |node|
-    node.vm.box = "ubuntu/artful64"
-    # on 1st run permissions are not properly read, a re-run of the playbook will fix this.
-    # fatal: [ubuntu17.10]: FAILED! => {"changed": false, "msg":
-    # "Unable to start service nsd: Job for nsd.service failed because the control process exited with error code.
-    # \nSee \"systemctl  status nsd.service\" and \"journalctl  -xe\" for details.\n"}
-    # Solution: re-run the ansible playbook
-  end
-
-  config.vm.define "ubuntu16.04" do |node| #LTS
-    node.vm.box = "ubuntu/xenial64"
-  end
-
-  config.vm.define "ubuntu14.04", autostart: false do |node| #LTS
-    node.vm.box = "ubuntu/trusty64"
-    #  Cannot fetch index base URL https://pypi.python.org/simple/\nCould not find any downloads that satisfy the requirement pip
-    #  No solution as of yet
-  end
-
-  # https://www.debian.org/releases/
-  # https://wiki.debian.org/DebianReleases
-  # https://app.vagrantup.com/debian/
-  # config.vm.define "debian10", autostart: false do |node| # development
-  #   node.vm.box = "debian/buster64"
+  # config.vm.define "ubuntu16.04" do |node| #LTS
+  #   node.vm.box = "ubuntu/xenial64"
   # end
 
-  config.vm.define "debian9" do |node|
-    node.vm.box = "debian/stretch64"
-     # Unable to reload service nsd: nsd.service is not active, cannot reload
-     # fixes itself after a second ansible palybook run
-     # Solution: re-run the ansible playbook
-  end
+  # config.vm.define "ubuntu14.04", autostart: false do |node| #LTS
+  #   node.vm.box = "ubuntu/trusty64"
+  #   #  Cannot fetch index base URL https://pypi.python.org/simple/\nCould not find any downloads that satisfy the requirement pip
+  #   #  No solution as of yet
+  # end
 
-  config.vm.define "debian8", autostart: false do |node|
-    node.vm.box = "debian/jessie64"
-    # Make unbound fails,  plugin needed to handle lto object
-    # Solution: upgrade compiler (gcc)
-  end
+  # # https://www.debian.org/releases/
+  # # https://wiki.debian.org/DebianReleases
+  # # https://app.vagrantup.com/debian/
+  # # config.vm.define "debian10", autostart: false do |node| # development
+  # #   node.vm.box = "debian/buster64"
+  # # end
 
-  # https://wiki.centos.org/Download
-  # https://app.vagrantup.com/centos/
-  config.vm.define "centos7" do |node|
-    node.vm.box = "centos/7"
-  end
+  # config.vm.define "debian9" do |node|
+  #   node.vm.box = "debian/stretch64"
+  #    # Unable to reload service nsd: nsd.service is not active, cannot reload
+  #    # fixes itself after a second ansible palybook run
+  #    # Solution: re-run the ansible playbook
+  # end
+
+  # config.vm.define "debian8", autostart: false do |node|
+  #   node.vm.box = "debian/jessie64"
+  #   # Make unbound fails,  plugin needed to handle lto object
+  #   # Solution: upgrade compiler (gcc)
+  # end
+
+  # # https://wiki.centos.org/Download
+  # # https://app.vagrantup.com/centos/
+  # config.vm.define "centos7" do |node|
+  #   node.vm.box = "centos/7"
+  # end
 
   # https://www.freebsd.org/releases/
   # https://app.vagrantup.com/freebsd/
@@ -60,7 +60,7 @@ Vagrant.configure("2") do |config|
     node.vm.synced_folder ".", "/vagrant", disabled: true
   end
 
-  config.vm.define "freebsd10.4", autostart: false do |node|
+  config.vm.define "freebsd10.4" do |node|
     node.vm.box = "freebsd/FreeBSD-10.4-RELEASE"
     node.ssh.shell = "sh"
     node.vm.base_mac = "080027D14C66"

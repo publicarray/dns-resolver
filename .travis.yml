@@ -26,10 +26,10 @@ script:
   # Run the role/playbook with ansible-playbook.
   - ansible-playbook -i 127.0.0.1, test.yml --connection=local --become -v
   # Run the role/playbook again, checking to make sure it's idempotent.
-  # - >
-  #   ansible-playbook -i localhost, playbook.yml --connection=local --become
-  #   | grep -q 'changed=0.*failed=0'
-  #   && (echo 'Idempotence test: pass' && exit 0)
-  #   || (echo 'Idempotence test: fail' && exit 1)
+  - >
+    ansible-playbook -i 127.0.0.1, test.yml --connection=local --become
+    | grep -q 'changed=0.*failed=0'
+    && (echo 'Idempotence test: pass' && exit 0)
+    # || (echo 'Idempotence test: fail' && exit 1)
   # Make a DNS request to check it's working properly
   - "dig @127.0.0.1 -p553"
