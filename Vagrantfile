@@ -2,7 +2,7 @@ Vagrant.configure("2") do |config|
 
   # https://wiki.ubuntu.com/Releases
   # https://app.vagrantup.com/ubuntu/
-  # config.vm.define "ubuntu18.04" do, autostart: false |node| # development #LTS
+  # config.vm.define "ubuntu18.04", autostart: false do |node| # development #LTS
   #   node.vm.box = "ubuntu/bionic64"
   # end
 
@@ -19,7 +19,7 @@ Vagrant.configure("2") do |config|
     node.vm.box = "ubuntu/xenial64"
   end
 
-  config.vm.define "ubuntu14.04" do, autostart: false |node| #LTS
+  config.vm.define "ubuntu14.04", autostart: false do |node| #LTS
     node.vm.box = "ubuntu/trusty64"
     #  Cannot fetch index base URL https://pypi.python.org/simple/\nCould not find any downloads that satisfy the requirement pip
     #  No solution as of yet
@@ -28,7 +28,7 @@ Vagrant.configure("2") do |config|
   # https://www.debian.org/releases/
   # https://wiki.debian.org/DebianReleases
   # https://app.vagrantup.com/debian/
-  # config.vm.define "debian10" do, autostart: false |node| # development
+  # config.vm.define "debian10", autostart: false do |node| # development
   #   node.vm.box = "debian/buster64"
   # end
 
@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
      # Solution: re-run the ansible playbook
   end
 
-  config.vm.define "debian8" do, autostart: false |node|
+  config.vm.define "debian8", autostart: false do |node|
     node.vm.box = "debian/jessie64"
     # Make unbound fails,  plugin needed to handle lto object
     # Solution: upgrade compiler (gcc)
@@ -60,7 +60,7 @@ Vagrant.configure("2") do |config|
     node.vm.synced_folder ".", "/vagrant", disabled: true
   end
 
-  config.vm.define "freebsd10.4" do, autostart: false |node|
+  config.vm.define "freebsd10.4", autostart: false do |node|
     node.vm.box = "freebsd/FreeBSD-10.4-RELEASE"
     node.ssh.shell = "sh"
     node.vm.base_mac = "080027D14C66"
