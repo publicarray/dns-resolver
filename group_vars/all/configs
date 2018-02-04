@@ -82,7 +82,7 @@ unbound:
     statistics_cumulative: no # for munin graphs
     ## Server
     interface: [127.0.0.1, '::1', 0.0.0.0@853, '::0@853']  # overwritten in host_vars to add {{ansible_vtnet1.ipv4[0].address}}
-    port: 56
+    port: 553
     ssl_service_key: private.key
     ssl_service_pem: certificate.pem
     ssl_port: 853
@@ -144,7 +144,7 @@ unbound:
     # so_rcvbuf: 4m
     # so_sndbuf: 4m
     neg_cache_size: 25m
-    cache_min_ttl: 120 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
+    cache_min_ttl: 60 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
     cache_max_ttl: 86400 # 14400=4h 86400=1day (default)
     # cache_max_negative_ttl: 3600 # 1h (default)
     # val-bogus-ttl: 120 # 60 (default)
