@@ -54,8 +54,8 @@ nsd_do_ip6: "yes"
 # https://www.unbound.net/documentation/unbound.conf.html
 # https://www.unbound.net/documentation/howto_optimise.html
 unbound_compile: true
-unbound_compile_version: 1.6.7
-unbound_compile_sha256: 4e7bd43d827004c6d51bef73adf941798e4588bdb40de5e79d89034d69751c9f
+# unbound_compile_version: 1.6.8
+# unbound_compile_sha256: e3b428e33f56a45417107448418865fe08d58e0e7fea199b855515f60884dd49
 # unbound_compile_config: "--enable-dnscrypt --enable-gost --enable-ed25519 --with-libevent --with-username={{unbound.server.username|default(unbound)}} --with-run-dir={{unbound.server.directory}} --with-conf-file={{unbound.server.directory}}/unbound.conf"
 unbound_optimise: true
 unbound_optimise_memory: 30
@@ -144,7 +144,7 @@ unbound:
     # so_rcvbuf: 4m
     # so_sndbuf: 4m
     neg_cache_size: 25m
-    cache_min_ttl: 600 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
+    cache_min_ttl: 120 # 86400=1day 43200=12h 3600=1h 1800=30m 1200=20m 900=15m 600=10m 300=5m=standard, 0 (default)
     cache_max_ttl: 86400 # 14400=4h 86400=1day (default)
     # cache_max_negative_ttl: 3600 # 1h (default)
     # val-bogus-ttl: 120 # 60 (default)
@@ -157,7 +157,7 @@ unbound:
     minimal_responses: yes # reduce reflected DoS effects
     # harden_short_bufsize: yes
     # harden_large_queries: yes
-    # harden_below_nxdomain: yes
+    harden_below_nxdomain: yes
     # harden_algo_downgrade: yes
     unwanted_reply_threshold: 10000000
     ## https://tools.ietf.org/html/rfc5735#section-3

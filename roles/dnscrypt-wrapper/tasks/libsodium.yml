@@ -1,0 +1,20 @@
+- name: get libsodium
+  git:
+    repo: https://github.com/jedisct1/libsodium.git
+    dest: /tmp/libsodium
+    version: stable
+
+- name: Install libsodium - ./configure
+  command: ./configure
+  args:
+    chdir: /tmp/libsodium
+
+- name: Install libsodium - make check
+  make:
+    chdir: /tmp/libsodium
+    target: check
+
+- name: Install libsodium - make install
+  make:
+    chdir: /tmp/libsodium
+    target: install

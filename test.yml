@@ -17,3 +17,5 @@
     # - { role: netdata, when: netdata == true, tags: [netdata] }
   vars:
     - unbound_tls_cert_provider: selfsigned
+  environment:
+    PATH: /usr/local/bin:/usr/local/sbin:{{ansible_env.PATH}}

@@ -46,24 +46,6 @@ brew cask install vagrant virtualbox
 vagrant up
 ```
 
-## Test with [molecule](https://molecule.readthedocs.io/)
-
-### first time setup
-
-```bash
-brew cask install vagrant virtualbox
-virtualenv --no-setuptools venv
-source venv/bin/activate or source venv/bin/activate.fish
-pip install python-vagrant molecule
-ansible-galaxy install -r requirements.yml -p required-roles # --force
-```
-
-#### Run test
-
-```bash
-molecule test
-```
-
 ## Linting & Formatting
 
 ```bash

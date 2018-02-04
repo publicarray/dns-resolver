@@ -11,35 +11,67 @@
     state: present
   with_items: "{{dnscrypt_packages}}"
 
+- name: Prepare to install libsodium
+  import_tasks: libsodium.yml
+  when: ansible_os_family == 'Debian'
+
 - name: Install dnscrypt-wrapper - git clone
-  when: ansible_os_family != 'FreeBSD'
+  when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
   git:
-    repo: 'https://github.com/cofyc/dnscrypt-wrapper.git'
-    dest: '/usr/src/dnscrypt-wrapper'
+    repo: https://github.com/cofyc/dnscrypt-wrapper.git
+    dest: /tmp/dnscrypt-wrapper
     recursive: yes
-    update: yes
-    force: yes
+    version: "{{dnscrypt_wrapper_git_version}}"
   tags:
     - skip_ansible_lint
 
 - name: Install dnscrypt-wrapper - make configure
-  when: ansible_os_family != 'FreeBSD'
+  when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
   make:
-    chdir: '/usr/src/dnscrypt-wrapper'
+    chdir: /tmp/dnscrypt-wrapper
     target: configure
 
 - name: Install dnscrypt-wrapper - ./configure
-  when: ansible_os_family != 'FreeBSD'
-  command: '"{{ item }}" chdir=/usr/src/dnscrypt-wrapper'
-  with_items:
-    - ./configure
+  when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+  command: ./configure
+  args:
+    chdir: /tmp/dnscrypt-wrapper
 
 - name: Install dnscrypt-wrapper - make install
-  when: ansible_os_family != 'FreeBSD'
+  when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
   make:
-    chdir: '/usr/src/dnscrypt-wrapper'
+    chdir: /tmp/dnscrypt-wrapper
     target: install
 
+- name: Install dnscrypt-wrapper - make install
+  when: ansible_os_family == 'FreeBSD'
+  package:
+    name: dnscrypt-wrapper
+    state: present
+
+# https://gist.githubusercontent.com/publicarray/a246106b5a6821b69b86e8d05ee41896/
+- name: Copy dnscrypt-autokey
+  get_url:
+    url: https://gist.githubusercontent.com/publicarray/a246106b5a6821b69b86e8d05ee41896/raw/dnscrypt-autokey.sh
+    dest: /usr/local/bin/dnscrypt-autokey
+    mode: 0755
+
+- name: Copy dnscrypt-autokey.conf settings
+  template:
+    src: dnscrypt-autokey.conf
+    dest: /usr/local/etc/dnscrypt-autokey.conf
+    mode: 0644
+
+# you can check with `crontab -l`. `crontab -e` to edit
+# (bash: export EDITOR=nano, fish: set -xU EDITOR nano)
+- name: Setup cron job (run every hour)
+  cron:
+    name: "dnscrypt-autokey"
+    job: "/usr/local/bin/dnscrypt-autokey -a > /dev/null"
+    special_time: hourly
+
 - name: Install dnscrypt-wrapper
-  pkgng: name=dnscrypt-wrapper state=present
+  pkgng:
+    name: dnscrypt-wrapper
+    state: present
   when: ansible_os_family == 'FreeBSD'

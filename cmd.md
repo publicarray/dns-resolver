@@ -70,18 +70,15 @@ showRules()
 
 addAction({"0.0.0.0"}, TCAction())
 addAction({"0.0.0.0"}, DropAction())
-addAction({"0.0.0.0"}, TeeAction("8.8.8.8")) -- send queries to 8.8.8.8 and cache response
+addAction({"0.0.0.0"}, TeeAction("8.8.8.8")) --send queries to 8.8.8.8
 --addDomainSpoof("example.com", "127.0.0.1")
 --addDomainBlock("example.com")
 addAction("example.com", DropAction())
 
-addDelay({"0.0.0.0", "example.com"}, 200)
 addAction(makeRule("0.0.0.0"), DelayAction(200))
 
 addAction(makeRule("0.0.0.0"), NoRecurseAction())
-addNoRecurseRule("example.com")
-
-addQPSLimit(makeRule("0.0.0.0"), 5)
+addAction("0.0.0.0", QPSAction(5))
 addAction(MaxQPSIPRule(5), NoRecurseAction())
 addAction("com.", QPSPoolAction(10000, "gtld-cluster"))
 
@@ -110,7 +107,6 @@ exceedNXDOMAINs(rate, seconds) -- exceed rate NXDOMAIN/s over seconds seconds
 exceedRespByterate(rate, seconds) -- exeeded rate bytes/s answers over seconds seconds
 exceedQTypeRate(type, rate, seconds) -- exceed rate queries/s for queries of type type over seconds seconds
 ```
-
 
 ## unbound
 
@@ -249,7 +245,7 @@ See implementation file for more sysctl options: [sys/netinet/tcp_fastopen.c](ht
 
 Use something like `pkg install subversion && svn co https://svn.FreeBSD.org/base/releng/$(freebsd-version | awk -F '-' '{print $1}')/usr/src` to get the source.
 
-/usr/src/sys/amd64/conf/MYKERNEL
+Example config: /usr/src/sys/amd64/conf/MYKERNEL
 
 ```sh
 include GENERIC
