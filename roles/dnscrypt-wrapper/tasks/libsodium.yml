@@ -1,3 +1,4 @@
+---
 - name: get libsodium
   git:
     repo: https://github.com/jedisct1/libsodium.git
@@ -8,6 +9,7 @@
   command: ./configure
   args:
     chdir: /tmp/libsodium
+    creates: /tmp/libsodium/Makefile
 
 - name: Install libsodium - make check
   make:
