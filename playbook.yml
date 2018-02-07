@@ -12,6 +12,5 @@
     - { role: nsd, when: opennic == true, tags: [nsd, opennic] }
     - { role: publicarray.unbound, tags: [unbound] }
     - { role: dnscrypt-wrapper, when: dnscrypt_wrapper == true, tags: [dnscrypt_wrapper] }
-    # - { role: netdata, when: netdata == true, tags: [netdata] }
   environment:
     PATH: /usr/local/bin:/usr/local/sbin:{{ansible_env.PATH}}

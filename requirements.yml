@@ -15,11 +15,6 @@
   version: master
   name: jnv.unattended-upgrades
 
-- src: https://github.com/jffz/ansible-netdata
-  scm: git
-  version: master
-  name: jffz.netdata
-
 - src: https://github.com/geerlingguy/ansible-role-repo-epel
   scm: git
   version: master
