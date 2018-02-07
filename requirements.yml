@@ -5,11 +5,6 @@
   version: master
   name: jeffwidman.yum-cron
 
-- src: https://github.com/PowerDNS/dnsdist-ansible
-  scm: git
-  version: master
-  name: PowerDNS.dnsdist
-
 - src: https://github.com/publicarray/ansible-role-unbound
   scm: git
   version: master

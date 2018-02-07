@@ -32,9 +32,8 @@ daily_apply_updates: no
 daily_random_sleep: 180
 yum_cron_clean_what: packages # keep metadata
 yum_cron_clean_when: weekly
-hourly_base_options:
-  - "exclude=dnsdist*"
-daily_base_options: "{{ hourly_base_options }}"
+# hourly_base_options: ["exclude=*"]
+# daily_base_options: "{{ hourly_base_options }}"
 
 # [OpenNIC / nsd]
 opennic: true
@@ -43,7 +42,7 @@ nsd_chroot_enable: true
 nsd_compile_flags: "--enable-root-server"
 nsd_ip_addresses: ["127.0.0.1"]
 nsd_reuseport: "yes"
-nsd_port: 57 # 40
+nsd_port: 552
 nsd_hide_version: "yes"
 nsd_round_robin: "yes"
 nsd_remote_control: "yes"
@@ -76,11 +75,12 @@ unbound:
     log_time_ascii: yes
     val_log_level: 0 # 1 = log dnssec validation errors for investigating problems 2 = (domain, dns server ip and reason)
     # statistics_interval: 86400 # once a day print latency statistics
-    pidfile: unbound.pid
+    # pidfile: unbound.pid
     statistics_interval: 0 # for munin graphs
     extended_statistics: yes # for munin graphs
     statistics_cumulative: no # for munin graphs
     ## Server
+    interface_automatic: yes
     interface: [127.0.0.1, '::1', 0.0.0.0@853, '::0@853']  # overwritten in host_vars to add {{ansible_vtnet1.ipv4[0].address}}
     port: 553
     ssl_service_key: private.key
@@ -179,7 +179,7 @@ unbound:
     ratelimit: 50 # prevent being part of a DDoS to authoritative
     # ratelimit-for-domain: example.com # exact match
     # ratelimit-below-domain: example.com 3
-    ip_ratelimit: 30 # prevent client DoS and other abuse
+    ip_ratelimit: 25 # prevent client DoS and other abuse
     # ip_ratelimit_size: 4m
     ###
     ## Vultr is filtering domains that seriously impacts the performance of neighboring instances.
@@ -194,81 +194,18 @@ unbound:
     control_enable: true
     control_interface: 127.0.0.1
 
-# [Generic DNSCrypt]
-dnscrypt_provider_name: '2.dnscrypt-cert.dns.seby.io'
-
 # [dnscrypt-wrapper] https://github.com/cofyc/dnscrypt-wrapper
-dnscrypt_wrapper: false
+dnscrypt_wrapper: true
+dnscrypt_wrapper_git_version: v0.3
+# dnscrypt_wrapper_git_version: master
 
-# [dnsdist] http://dnsdist.org/README/
-# https://github.com/PowerDNS/dnsdist-ansible
-dnsdist: true
-# dnsdist_install_repo: "{{ dnsdist_powerdns_repo_10 }}"
-# dnsdist_install_repo: "{{ dnsdist_powerdns_repo_11 }}"
-dnsdist_install_repo: "{{ dnsdist_powerdns_repo_12 }}"
-# dnsdist_install_repo: "{{ dnsdist_powerdns_repo_master }}"
-dnsdist_locals: []
-# dnsdist_controlsocket: "127.0.0.1"
-# dnsdist_setkey: "" # Change this
-# dnsdist_acls: []
-# dnsdist_servers: ['127.0.0.1:55']
-
-dnsdist_config: |
-  --General settings
-  setACL({'0.0.0.0/0', '::/0'}) --allow WWW
-  controlSocket("127.0.0.1")
-  setTCPRecvTimeout(4) --client timeout
-  setTCPSendTimeout(4)
-  setTCPUseSinglePipe(true)
-  setStaleCacheEntriesTTL(86400) --86400sec = 24h
-  setServerPolicy(leastOutstanding) --options:firstAvailable,whashed,wrandom,roundrobin (Default leastOutstanding)
-  setRingBuffersSize(250) --set the capacity of the ring buffers used for live traffic inspection and actions (default 10000)
-
-  --Backend servers / Packet Cache
-  pc = newPacketCache(10000, 86400, 0, 60, 60) --cache max 10000 queries
-  newServer({address="127.0.0.1:{{unbound.server.port}}", name="unbound", weight=10})
-  --newServer({address="9.9.9.9",  name="Quad9", qps=50, order=100}) --last resort/fallback if unbound is down https://www.quad9.net (block list)
-  --newServer({address="9.9.9.10", name="Quad9", qps=50, order=100}) --last resort/fallback if unbound is down https://www.quad9.net
-  --newServer({address="37.235.1.174", name="FreeDNS", qps=10, order=100}) --last resort/fallback if unbound is down
-  --newServer({address="37.235.1.177", name="FreeDNS", qps=10, order=100}) --last resort/fallback if unbound is down
-  --newServer({address="84.200.69.80", name="DNS.Watch", qps=20, pool="abuse"})
-  --newServer({address="84.200.70.40", name="DNS.Watch", qps=20, pool="abuse"})
-  --newServer({address="208.67.220.220", name="OpenDNS", qps=50, pool="abuse"})
-  --newServer({address="208.67.222.222", name="OpenDNS", qps=50, pool="abuse"})
-  getPool(""):setCache(pc)
-  -- getPool("abuse"):setCache(pc)
-
-  -- Simple abuse protection
-  setDynBlocksAction(DNSAction.Refused) -- DNSAction.Refused/DNSAction.Drop
-  -- https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml
-  addAction(NotRule(QClassRule(1)), DropAction()) -- drop classes that are not for the internet
-  addAction(OpcodeRule(5), DropAction()) -- drop update queries
-  addAction(AndRule({QTypeRule(255), TCPRule(false)}), TCAction()) --force ANY queries over tcp (prevent spoofed queries)
-  addAction(AndRule({MaxQPSIPRule(50), TCPRule(false)}), TCAction()) --ask for tcp when traffic is greater than 50 qps per ip
-  --addDelay(MaxQPSIPRule(50, 32, 48), 100) --add 50ms delay to IPs with greater than 50qps (queries per second)
-  --addAction(MaxQPSIPRule(50), NoRecurseAction()) --strips the Recursion Desired (RD) bit from traffic greater than 50 qps per ip
-
-  includeDirectory("/etc/dnsdist/config.d/")
-
-  local last = 0
-  function maintenance()
-    addDynBlocks(exceedQRate(80, 10), "Exceeded query rate", 600) --block IPs greater than 80qps over 10 sec for 10 min
-    addDynBlocks(exceedRespByterate(20000, 10), "Exceeded byte rate", 600) --block IPs that request more than 20 kilobytes/s over 10sec for 10 min
-
-    autoRenewCert() -- DNSCrypt
-  end
-
-  -- Statistics
-  -- webserver("127.0.0.1:8083", "mysuperpass")
-  -- carbonServer("37.252.122.50", "dns.seby")
-  -- https://metronome1.powerdns.com/?server=dnsdist.dns.seby
-  -- https://metrics.powerdns.com/?server=dnsdist.dns.seby
-
-  -- these domains have high error rate or the DNS responses time-out
-  addAction("tracker.publicbt.com", RCodeAction(3)) -- No Response http://dnsviz.net/d/tracker.publicbt.com/dnssec/ http://dnscheck.pingdom.com/?domain=publicbt.com
-  addAction("tracker.flashtorrents.org", RCodeAction(2)) -- Name Server is down http://dnscheck.pingdom.com/?domain=flashtorrents.org
-# [netdata]
-netdata: false
-
-# /etc/netdata/netdata.conf
-# /etc/netdata/health_alarm_notify.conf
+# [DNSCrypt-autokey]
+dnscrypt_provider_name: '2.dnscrypt-cert.dns.seby.io'
+dnscrypt_chacha20: 0 # OpenBDS no chacha20 in tlslib by default
+dnscrypt_validity_period: 1 # days
+dnscrypt_mode: wrapper
+dnscrypt_keydir:
+dnscrypt_ports:
+  - 443
+  - 5353
+  - 8080

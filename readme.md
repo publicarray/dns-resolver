@@ -15,26 +15,10 @@ $ ansible-playbook playbook.yml -i hosts --check --diff
 
 ## Post install
 
-Generate new keys (optional - this is done automatically)
+<!-- Generate new keys (optional - this is done automatically) -->
 
 ```sh
-$ service dnsdist stop
-$ dnsdist
 
-> generateDNSCryptProviderKeys("/etc/dnsdist/providerPublic.key", "/etc/dnsdist/providerPrivate.key")
-> generateDNSCryptCertificate("/etc/dnsdist/providerPrivate.key", "/etc/dnsdist/resolver.cert.0", "/etc/dnsdist/resolver.key.0", 0, os.time(), os.time()+(365*86400))
-> shutdown()
-
-$ service dnsdist start
-```
-
-Get DNScrypt provider fingerprint
-
-```sh
-$ dnsdist --client
-
-> printDNSCryptProviderFingerprint("/etc/dnsdist/providerPublic.key")
-> quit
 ```
 
 # Test

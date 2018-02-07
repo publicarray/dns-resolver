@@ -10,44 +10,67 @@
     name: "{{item}}"
     state: present
   with_items: "{{dnscrypt_packages}}"
+  # when: ansible_os_family != 'OpenBSD'
+
+# - name: Install build/dependency packages [OpenBSD]
+#   openbsd_pkg:
+#     name: "{{item}}"
+#     state: present
+#     # build: yes
+#   with_items: "{{dnscrypt_packages}}"
+#   when: ansible_os_family == 'OpenBSD'
 
 - name: Prepare to install libsodium
   import_tasks: libsodium.yml
   when: ansible_os_family == 'Debian'
 
 - name: Install dnscrypt-wrapper - git clone
-  when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+  when: ansible_os_family != 'FreeBSD'
   git:
     repo: https://github.com/cofyc/dnscrypt-wrapper.git
     dest: /tmp/dnscrypt-wrapper
     recursive: yes
-    version: "{{dnscrypt_wrapper_git_version}}"
+    force: yes
+    version: "{{dnscrypt_wrapper_git_version|default('v0.3')}}"
   tags:
     - skip_ansible_lint
 
-- name: Install dnscrypt-wrapper - make configure
+- name: Install dnscrypt-wrapper - make configure [Linux]
   when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
   make:
     chdir: /tmp/dnscrypt-wrapper
     target: configure
 
-- name: Install dnscrypt-wrapper - ./configure
-  when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+- name: Install dnscrypt-wrapper - ./configure [Linux]
+  when: ansible_os_family != 'FreeBSD' and ansible_os_family != 'OpenBSD'
   command: ./configure
   args:
     chdir: /tmp/dnscrypt-wrapper
 
-- name: Install dnscrypt-wrapper - make install
-  when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+- name: Install dnscrypt-wrapper - make install [Linux]
+  when: ansible_os_family != 'FreeBSD' and ansible_os_family != 'OpenBSD'
   make:
     chdir: /tmp/dnscrypt-wrapper
     target: install
 
-- name: Install dnscrypt-wrapper - make install
+- name: Install dnscrypt-wrapper - [FreeBSD]
   when: ansible_os_family == 'FreeBSD'
   package:
     name: dnscrypt-wrapper
     state: present
+
+- name: Install dnscrypt-wrapper - [OpenBSD]
+  when: ansible_os_family == 'OpenBSD'
+  command: gmake LDFLAGS='-L/usr/local/lib/' CFLAGS=-I/usr/local/include/ install
+  args:
+    chdir: /tmp/dnscrypt-wrapper
+  environment:
+    AUTOCONF_VERSION: 2.69
+
+- name: Create /usr/local/etc directory if it doesn't exist
+  file:
+    path: /usr/local/etc/
+    state: directory
 
 # https://gist.githubusercontent.com/publicarray/a246106b5a6821b69b86e8d05ee41896/
 - name: Copy dnscrypt-autokey
@@ -61,6 +84,11 @@
     src: dnscrypt-autokey.conf
     dest: /usr/local/etc/dnscrypt-autokey.conf
     mode: 0644
+
+- name: Setup and create keys with dnscrypt-autokey
+  command: /usr/local/bin/dnscrypt-autokey -a
+  args:
+    creates: "{{dnscrypt_keydir|default('/usr/local/etc/dnscrypt-wrapper/keys')}}/??????.key"
 
 # you can check with `crontab -l`. `crontab -e` to edit
 # (bash: export EDITOR=nano, fish: set -xU EDITOR nano)

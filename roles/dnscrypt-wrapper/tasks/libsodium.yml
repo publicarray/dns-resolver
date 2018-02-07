@@ -20,3 +20,6 @@
   make:
     chdir: /tmp/libsodium
     target: install
+
+- name: ldconfig
+  command: ldconfig
