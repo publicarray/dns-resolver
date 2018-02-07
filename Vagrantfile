@@ -62,7 +62,7 @@ Vagrant.configure("2") do |config|
     # due to a script that updates, sets up FreeBSD and reboots the machine
   end
 
-  config.vm.define "freebsd10.4" do |node|
+  config.vm.define "freebsd10.4", autostart: false do |node|
     node.vm.box = "freebsd/FreeBSD-10.4-RELEASE"
     node.ssh.shell = "sh"
     node.vm.base_mac = "080027D14C66"
@@ -76,6 +76,8 @@ Vagrant.configure("2") do |config|
   config.vm.define "openbsd6" do |node|
     node.vm.box = "generic/openbsd6"
     node.ssh.shell = "sh"
+    # TASK [publicarray.unbound : Generate an OpenSSL private key with the default values (4096 bits, RSA)] ***
+    # fatal: [openbsd6]: FAILED! => {"changed": false, "msg": "The directory /usr/local/etc/unbound does not exist or the file is not a directory", "name": "/usr/local/etc/unbound"}
   end
 
   config.vm.provision :shell, inline: <<-SHELL

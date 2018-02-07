@@ -42,9 +42,29 @@
     state: directory
   notify: Restart nsd
 
+- name: Create db file
+  copy:
+    content: ""
+    force: no
+    dest: "{{ nsd_chroot_dir }}/nsd.db"
+    mode: 0600
+    owner: "{{ nsd_user }}"
+    group: "{{ nsd_group }}"
+  when: nsd_chroot_dir is defined
+
+- name: Create ixfr.state file
+  copy:
+    content: ""
+    force: no
+    dest: "{{ nsd_chroot_dir }}/ixfr.state"
+    mode: 0644
+    owner: "{{ nsd_user }}"
+    group: "{{ nsd_group }}"
+  when: nsd_chroot_dir is defined
+
 - name: Create zonefiles directory
   file:
-    path: "{{ nsd_zonesdir }}"
+    path: "{{ nsd_chroot_dir }}/zonefiles"
     mode: 0750
     owner: "{{ nsd_user }}"
     group: "{{ nsd_group }}"

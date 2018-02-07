@@ -1,9 +1,5 @@
 ---
 
-# - name: Bootstrap python install
-#   raw: pkg install -y python
-#   when: ansible_os_family == 'FreeBSD'
-
 - name: read platform variables
   include_vars:
     file: "{{ ansible_os_family }}.yml"
@@ -35,18 +31,25 @@
     state: present
   with_items: "{{_packages}} + {{custom_packages|default([])}}"
 
-- name: Get ports index [FreeBSD]
+- name: Get ports index [FreeBSD 10]
+  command: portsnap fetch extract
+  args:
+    creates: /usr/ports
+  when: ansible_os_family == 'FreeBSD' and ansible_distribution_major_version == '10'
+
+- name: Get ports index [FreeBSD 11]
   command: portsnap auto
   args:
     creates: /usr/ports
-  when: ansible_os_family == 'FreeBSD'
+  when: ansible_os_family == 'FreeBSD' and ansible_distribution_major_version == '11'
 
-- name: Install ports
+- name: Install ports [FreeBSD 11]
   portinstall:
     name: "{{item}}"
     state: present
   with_items: "{{_ports}} + {{custom_ports|default([])}}"
-  when: ansible_os_family == 'FreeBSD'
+  when: ansible_os_family == 'FreeBSD' and ansible_distribution_major_version == '11'
+
 # freebsd-update upgrade -r 11.1-RELEASE
 #
 # synth install dns/dnsdist
