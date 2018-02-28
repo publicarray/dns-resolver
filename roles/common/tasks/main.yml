@@ -5,6 +5,12 @@
     file: "{{ ansible_os_family }}.yml"
   tags: [always]
 
+# Fix wrong config path on OpenBSD
+- name: Set unbound_compile=false -> OpenBSD already has unbound installed
+  set_fact:
+    unbound_compile: false
+  when: ansible_os_family == 'OpenBSD'
+
 - name: whoami
   command: whoami
   register: whoami

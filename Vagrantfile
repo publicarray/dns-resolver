@@ -45,6 +45,16 @@ Vagrant.configure("2") do |config|
     # Solution: upgrade compiler (gcc)
   end
 
+  # https://fedoraproject.org/wiki/Releases
+  # https://app.vagrantup.com/fedora/
+  config.vm.define "fedora27" do |node|
+    node.vm.box = "fedora/27-cloud-base"
+  end
+
+  config.vm.define "fedora26", autostart: false do |node|
+    node.vm.box = "fedora/26-cloud-base"
+  end
+
   # https://wiki.centos.org/Download
   # https://app.vagrantup.com/centos/
   config.vm.define "centos7" do |node|
@@ -75,6 +85,7 @@ Vagrant.configure("2") do |config|
   # https://app.vagrantup.com/generic/
   config.vm.define "openbsd6" do |node|
     node.vm.box = "generic/openbsd6"
+    # node.vm.network "private_network", type: "dhcp"
     node.ssh.shell = "sh"
     # TASK [publicarray.unbound : Generate an OpenSSL private key with the default values (4096 bits, RSA)] ***
     # fatal: [openbsd6]: FAILED! => {"changed": false, "msg": "The directory /usr/local/etc/unbound does not exist or the file is not a directory", "name": "/usr/local/etc/unbound"}
@@ -83,6 +94,9 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, inline: <<-SHELL
     if command -v python>/dev/null 2>&1; then
       exit 0
+    elif command -v dnf >/dev/null 2>&1; then
+      dnf check-update
+      dnf install -y python
     elif command -v yum >/dev/null 2>&1; then
       yum check-update
       yum install python
@@ -109,6 +123,7 @@ Vagrant.configure("2") do |config|
   # Use :ansible or :ansible_local
   config.vm.provision :ansible do |ansible|
     ansible.verbose = "v"
+    ansible.raw_arguments = ["--diff"]
     ansible.playbook = "test.yml"
   end
 end

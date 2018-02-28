@@ -1,0 +1,5 @@
+---
+_munin_deamon: munin-node
+_munin_path: /etc/munin
+_munin_logfile: /var/log/munin-node/munin-node.log
+_munin_group: root

@@ -42,6 +42,13 @@
     state: directory
   notify: Restart nsd
 
+# fix [fedora27] FAILED "Aborting, target uses selinux but python bindings (libselinux-python) aren't installed!"}
+- name: Install libselinux-python - [Fedora]
+  package:
+    name: libselinux-python
+    state: present
+  when: ansible_distribution == 'Fedora'
+
 - name: Create db file
   copy:
     content: ""

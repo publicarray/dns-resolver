@@ -5,13 +5,17 @@
   # strategy: debug
   remote_user: root
   roles:
-    - { role: geerlingguy.repo-epel, when: ansible_os_family == 'RedHat', tags: [init] }
+    - { role: geerlingguy.repo-epel, when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat', tags: [init] }
+    - { role: mtier, tags: [init], when: ansible_distribution == 'OpenBSD'}
     - { role: common, tags: [init] }
     - { role: jnv.unattended-upgrades, when: ansible_os_family == 'Debian', tags: [init] }
-    - { role: jeffwidman.yum-cron, when: ansible_os_family == 'RedHat', tags: [init] }
+    - { role: jeffwidman.yum-cron, when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat', tags: [init] }
     - { role: nsd, when: opennic == true, tags: [nsd, opennic] }
     - { role: publicarray.unbound, tags: [unbound] }
+    - { role: munin, tags: [unbound, munin], when: unbound_munin }
     - { role: dnscrypt-wrapper, when: dnscrypt_wrapper == true, tags: [dnscrypt_wrapper] }
+    - { role: doh, tags: [doh], when: doh }
+    - { role: haproxy, tags: [haproxy] }
   vars:
     - unbound_tls_cert_provider: selfsigned
   environment:

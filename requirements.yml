@@ -7,7 +7,7 @@
 
 - src: https://github.com/publicarray/ansible-role-unbound
   scm: git
-  version: master
+  version: munin
   name: publicarray.unbound
 
 - src: https://github.com/jnv/ansible-role-unattended-upgrades

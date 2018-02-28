@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# OpenBSD
+
+daemon="/usr/local/bin/doh-proxy"
+daemon_flags="-u 127.0.0.1:53"
+daemon_user=doh-proxy
+rc_reload="NO"
+
+. /etc/rc.d/rc.subr
+
+rc_start() {
+    ${rcexec} "${daemon} ${daemon_flags} &"
+}
+
+rc_cmd $1

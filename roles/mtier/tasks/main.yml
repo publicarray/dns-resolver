@@ -1,0 +1,11 @@
+---
+
+- name: Install the M:Tier public key
+  get_url:
+    url: https://stable.mtier.org/mtier-62-pkg.pub
+    dest: /etc/signify/mtier-62-pkg.pub
+
+- name: Update installurl
+  template:
+    src: installurl
+    dest: /etc/installurl

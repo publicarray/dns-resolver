@@ -56,6 +56,7 @@ unbound_compile: true
 # unbound_compile_version: 1.6.8
 # unbound_compile_sha256: e3b428e33f56a45417107448418865fe08d58e0e7fea199b855515f60884dd49
 # unbound_compile_config: "--enable-dnscrypt --enable-gost --enable-ed25519 --with-libevent --with-username={{unbound.server.username|default(unbound)}} --with-run-dir={{unbound.server.directory}} --with-conf-file={{unbound.server.directory}}/unbound.conf"
+unbound_munin: true
 unbound_optimise: true
 unbound_optimise_memory: 30
 unbound_tls_domain: dns.seby.io
@@ -82,12 +83,12 @@ unbound:
     ## Server
     interface_automatic: yes
     interface: [127.0.0.1, '::1', 0.0.0.0@853, '::0@853']  # overwritten in host_vars to add {{ansible_vtnet1.ipv4[0].address}}
-    port: 553
+    port: 53
     ssl_service_key: private.key
     ssl_service_pem: certificate.pem
     ssl_port: 853
     root_hints: root.hints
-    udp_upstream_without_downstream: yes
+    # udp_upstream_without_downstream: yes
     access_control: [0.0.0.0/0 allow, '::/0 allow']
     ## Privacy
     qname_minimisation: yes
@@ -194,6 +195,9 @@ unbound:
     control_enable: true
     control_interface: 127.0.0.1
 
+# I'm using a private network/interface
+# munin_bind: "0.0.0.0"
+
 # [dnscrypt-wrapper] https://github.com/cofyc/dnscrypt-wrapper
 dnscrypt_wrapper: true
 dnscrypt_wrapper_git_version: v0.3
@@ -209,3 +213,78 @@ dnscrypt_ports:
   - 443
   - 5353
   - 8080
+dnscrypt_listen: 0.0.0.0
+
+# DNS-over-HTTPS/2
+doh: true
+
+# https://dnsprivacy.org/wiki/display/DP/Building+HAProxy+so+that+it+can+use+TLSv1.3
+# https://serverfault.com/questions/504308/by-what-criteria-do-you-tune-timeouts-in-ha-proxy-config
+haproxy_config: |
+  global
+          ### netdata
+          ## stats socket /var/run/haproxy.sock mode 660 level operator group netdata
+          ## stats timeout 2m #Wait up to 2 minutes for input
+          log 127.0.0.1   local0 debug
+          # log /var/run/log local0 notice
+          maxconn 1024
+          # maxconn 2048
+          # maxconn 4000
+          chroot /var/haproxy
+          uid 604
+          gid 604
+          # user haproxy
+          # group haproxy
+          daemon
+          pidfile /var/run/haproxy.pid
+          # ssl-default-bind-ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+          # ssl-default-bind-ciphers TLS13-AES-256-GCM-SHA384:TLS13-AES-128-GCM-SHA256:TLS13-CHACHA20-POLY1305-SHA256:EECDH+AESGCM:EECDH+CHACHA20
+          # ssl-default-bind-options no-tls-tickets no-sslv3
+          # ssl-default-bind-options no-sslv3 no-tlsv10 no-tlsv11 no-tlsv12
+
+  defaults
+          log     global
+          mode    http
+          option  httplog
+          option  dontlognull
+          option  redispatch
+          retries 3
+          maxconn 2000
+          # option http-server-close
+          # option forwardfor
+          ## option dontlog-normal
+          ## balance roundrobin
+          # timeout http-request 10s
+          # timeout queue 10s
+          timeout connect 5s
+          timeout check 10s
+          timeout client 20s
+          timeout server 15s
+          # timeout http-keep-alive 10s
+
+  frontend http-in
+          bind *:80
+          mode http
+          redirect location https://www.dns.seby.io code 301 if { hdr(host) -i dns.seby.io }
+          redirect location https://www.dns.seby.io code 301 if { hdr(host) -i www.dns.seby.io }
+          redirect location https://www.ntppool.org/en/ code 301
+
+  frontend doh-in
+          bind *:452
+          bind *:453 ssl crt {{haproxy_path}}/bundle.pem alpn h2,http/1.1 # h2,http/1.1
+          acl dns_url path_beg -i /dns-query
+          use_backend doh-servers if dns_url
+          redirect location https://www.dns.seby.io code 301 if !dns_url { hdr(host) -i dns.seby.io }
+          redirect location https://www.dns.seby.io code 301 if { hdr(host) i www.dns.seby.io }
+          redirect location https://www.ntppool.org/en/ code 301 if { hdr(host) -i ntppool.org }
+          default_backend doh-servers
+
+  backend doh-servers
+          option forwardfor
+          server doh-proxy 127.0.0.1:3000
+
+  #listen dns-over-tls
+  #    maxconn 10
+  #    bind 0.0.0.0:853 tfo ssl crt {{haproxy_path}}/bundle.pem
+  #    server unbound 127.0.0.1:53 # unbound
+  #    #server unboundtls 127.0.0.1:854 ssl verify none # unbound tls

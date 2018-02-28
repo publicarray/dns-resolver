@@ -1,0 +1,3 @@
+---
+_munin_deamon: munin-node
+_munin_path: /usr/local/etc/munin

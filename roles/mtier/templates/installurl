@@ -1,0 +1,3 @@
+{{ ansible_managed | comment }}
+
+https://stable.mtier.org/updates/{{ansible_distribution_version}}/{{ansible_architecture}}:https://cloudflare.cdn.openbsd.org/pub/OpenBSD:https://fastly.cdn.openbsd.org/pub/OpenBSD:http://ftp.openbsd.org/pub/OpenBSD

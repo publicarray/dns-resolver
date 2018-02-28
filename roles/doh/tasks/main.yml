@@ -1,0 +1,77 @@
+---
+# - name: Read platform varables
+#   include_vars:
+#     file: "{{ ansible_os_family }}.yml"
+
+# fatal: [centos7]: FAILED! => { "exit_status": 1, "msg": "failed to validate",
+#  "stderr": 'bind *:453' : 'alpn' : library does not support TLS ALPN extension
+#  [ALERT] 057/095435 (31175) : Error(s) found in configuration file
+## soluton get newer openssl and recompile
+
+- name: Install rust [OpenBSD]
+  package:
+    name: rust
+    state: present
+  when: ansible_os_family == 'OpenBSD'
+
+- name: Install doh-proxy [OpenBSD]
+  shell: cargo install doh-proxy --root /usr/local/
+  args:
+    creates: /usr/local/bin/doh-proxy
+  when: ansible_os_family == 'OpenBSD'
+
+- name: Install rust
+  shell: curl https://sh.rustup.rs -sSf | sh -s -- -y
+  args:
+    creates: ~/.cargo/bin/rustc
+  when: ansible_os_family != 'OpenBSD'
+
+- name: Install doh-proxy
+  shell: ~/.cargo/bin/cargo install doh-proxy --root /usr/local/
+  args:
+    creates: /usr/local/bin/doh-proxy
+  when: ansible_os_family != 'OpenBSD'
+
+- name: Copy doh-proxy systemd service
+  template:
+    src: doh-proxy.service
+    dest: /lib/systemd/system/doh-proxy.service
+  when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+
+- name: Copy doh-proxy OpenBSD init script
+  template:
+    src: doh_proxy.rc
+    dest: /etc/rc.d/doh_proxy
+    mode: 0555
+  when: ansible_os_family == 'OpenBSD'
+
+- user:
+    name: doh-proxy
+    shell: nologin
+    createhome: no
+  when: ansible_os_family == 'OpenBSD'
+
+- user:
+    name: doh-proxy
+    createhome: no
+  when: ansible_os_family != 'OpenBSD'
+
+- name: Copy doh-proxy FreeBSD init script
+  template:
+    src: doh-proxy.rc
+    dest: /usr/local/etc/rc.d/doh-proxy
+  when: ansible_os_family == 'FreeBSD'
+
+- name: Ensure doh-proxy is running.
+  service:
+    name: doh-proxy
+    state: started
+    enabled: true
+  when: ansible_os_family != 'OpenBSD'
+
+- name: Ensure doh-proxy is running [OpenBSD]
+  service:
+    name: doh_proxy
+    state: started
+    enabled: true
+  when: ansible_os_family == 'OpenBSD'

@@ -1,0 +1,5 @@
+---
+- name: Restart munin-node
+  service:
+    name: "{{munin_deamon}}"
+    state: restarted

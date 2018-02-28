@@ -1,0 +1,47 @@
+---
+
+- name: Read platform varables
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
+
+- name: Install HAProxy
+  package:
+    name: haproxy
+    state: present
+  # when: ansible_os_family != 'FreeBSD'
+
+# - name: Install HAProxy from port
+#   portinstall:
+#     name: haproxy
+#     state: present
+#   when: ansible_os_family == 'FreeBSD'
+
+- name: Create self signed certificate
+  shell: |
+    openssl req -x509 -newkey rsa:4096 -sha256 -nodes \
+      -keyout {{haproxy_path}}/private.key \
+      -out {{haproxy_path}}/cert.pem \
+      -subj '/CN=localhost -days 99999'
+  args:
+    chdir: "{{haproxy_path}}"
+    creates: "{{haproxy_path}}/cert.pem"
+
+- name: Create Cert-Key bundle
+  shell: cat cert.pem private.key > bundle.pem
+  args:
+    chdir: "{{haproxy_path}}"
+    creates: "{{haproxy_path}}/bundle.pem"
+
+- name: Copy HAProxy configuration
+  template:
+    src: haproxy.cfg
+    dest: "{{haproxy_path}}/haproxy.cfg"
+    mode: 0644
+    validate: "haproxy -f %s -c -q"
+  notify: restart haproxy
+
+- name: Ensure HAProxy is running.
+  service:
+    name: haproxy
+    state: started
+    enabled: true

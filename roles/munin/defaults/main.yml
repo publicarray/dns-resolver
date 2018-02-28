@@ -1,0 +1,7 @@
+munin_allow: "{{ ['127.0.0.1'] + peer_ips|default([]) }}"
+munin_host: "{{ ansible_nodename }}"
+munin_bind: "{{ ansible_default_ipv4.address|default('*') }}"
+munin_path: "{{ _munin_path|default('/etc/munin') }}"
+munin_deamon: "{{_munin_deamon}}"
+munin_logfile: "{{_munin_logfile}}"
+munin_group: "{{_munin_group}}"

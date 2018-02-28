@@ -3,6 +3,7 @@ group_vars/all/secrets
 *.log
 temp
 hosts
+badips
 venv
 required-roles
 .molecule

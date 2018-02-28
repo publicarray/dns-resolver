@@ -1,0 +1,34 @@
+---
+
+- name: Read platform variables
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
+  tags: [always]
+
+- name: Install munin-node and openssl
+  package:
+    name: "{{item}}"
+    state: present
+  with_items: ['munin-node', 'openssl']
+
+- name: Create self signed certificate
+  shell: |
+    openssl req -x509 -newkey rsa:4096 -sha256 -nodes \
+      -keyout {{munin_path}}/private.key \
+      -out {{munin_path}}/cert.pem \
+      -subj '/CN=localhost -days 99999'
+  args:
+    chdir: "{{munin_path}}"
+    creates: "{{munin_path}}/cert.pem"
+
+- name: Copy munin config
+  template:
+    src: munin.conf
+    dest: "{{munin_path}}/munin-node.conf"
+  notify: Restart munin-node
+
+- name: Ensure munin-node is running
+  service:
+    name: "{{munin_deamon}}"
+    state: started
+    enabled: true

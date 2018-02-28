@@ -1,0 +1,2 @@
+---
+haproxy_path: "{{_haproxy_path|default('/etc/haproxy')}}"
