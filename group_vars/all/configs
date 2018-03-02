@@ -61,7 +61,7 @@ unbound_optimise: true
 unbound_optimise_memory: 30
 unbound_tls_domain: dns.seby.io
 unbound_tls_cert_provider: acme
-unbound_tls_acme_auto_upgrade: 1
+unbound_tls_acme_auto_upgrade: 0
 unbound_tls_acme_mode: dns dns_cf
 unbound_tls_acme_staging: false
 unbound_tls_acme_force: false
@@ -81,7 +81,6 @@ unbound:
     extended_statistics: yes # for munin graphs
     statistics_cumulative: no # for munin graphs
     ## Server
-    interface_automatic: yes
     interface: [127.0.0.1, '::1', 0.0.0.0@853, '::0@853']  # overwritten in host_vars to add {{ansible_vtnet1.ipv4[0].address}}
     port: 53
     ssl_service_key: private.key
@@ -177,10 +176,10 @@ unbound:
       - 10.0.0.0/8 # private networks (RFC 1918):
       - 172.16.0.0/12
       - 192.168.0.0/16
-    ratelimit: 50 # prevent being part of a DDoS to authoritative
+    ratelimit: 100 # prevent being part of a DDoS to authoritative
     # ratelimit-for-domain: example.com # exact match
     # ratelimit-below-domain: example.com 3
-    ip_ratelimit: 25 # prevent client DoS and other abuse
+    # ip_ratelimit: 25 # prevent client DoS and other abuse
     # ip_ratelimit_size: 4m
     ###
     ## Vultr is filtering domains that seriously impacts the performance of neighboring instances.
