@@ -1,3 +1,9 @@
+## NOTICE
+
+### This repo is archived. It is too much of a burden to deal with different OS workarounds. I've migrated to docker: https://github.com/publicarray/dns-resolver-infra
+
+---
+
 # Open DNS Resolver with DNSCrypt
 
 ## Usage
